@@ -22,6 +22,24 @@
     background:radial-gradient(120% 60% at 100% 0%, #16130c 0%, rgba(11,11,13,0) 55%), var(--bg)}
   .osw{font-family:'Oswald',sans-serif}
   svg{display:block}
+  /* ---------- Motion ---------- */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .anim-in{animation:fadeUp .30s cubic-bezier(.22,.61,.36,1) both}
+  @keyframes dropIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  .viewmenu.open{animation:dropIn .2s ease both}
+  @keyframes fadeBg{from{opacity:0}to{opacity:1}}
+  .overlay.show{animation:fadeBg .18s ease}
+  @keyframes sheetDown{to{transform:translateY(40px);opacity:0}}
+  @keyframes bgOut{to{opacity:0}}
+  .sheet.closing{animation:sheetDown .2s ease forwards}
+  .overlay.closing{animation:bgOut .2s ease forwards}
+  .pcard,.chip,.rtab,.tcard,.set-row,.rt-r,.qrow,.team-block,.etag,.qbtn,.bbtn,.dbtn,.filterbtn,
+  .nav button,.vm-item,.dndbtn,.qedit,.link,.gear,.stat,.rankbubble,.tag,.sw-opt,.q-handle button,.arrows button,.viewas{
+    transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .16s ease,opacity .18s ease,box-shadow .18s ease}
+  .pcard:active,.tcard:active,.set-row:active,.rt-r:active,.qrow:active{transform:scale(.99)}
+  .chip:active,.qbtn:active,.bbtn:active,.dbtn:active,.etag:active,.rtab:active,.dndbtn:active,.filterbtn:active,.tag:active,.vm-item:active{transform:scale(.96)}
+  .nav button:active{transform:scale(.9)}
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important;transition-duration:.001ms !important} }
 
   /* ---------- Header ---------- */
   .topbar{position:sticky;top:0;z-index:40;background:linear-gradient(180deg,#101012,#0b0b0d);border-bottom:1px solid var(--line)}
@@ -138,9 +156,18 @@
   .badge-dnd{display:inline-flex;align-items:center;gap:4px;font-family:'Oswald',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.6px;color:#fff;background:var(--red);border-radius:5px;padding:3px 7px;text-transform:uppercase}
   .badge-dnd svg{width:11px;height:11px}
   .dnd-name{color:#ef6a5e !important;text-decoration:line-through;text-decoration-color:rgba(239,106,94,.55);text-decoration-thickness:2px}
-  .dndbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;background:transparent;border:1.5px solid var(--red);color:#ef6a5e;border-radius:11px;padding:13px;font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;margin:2px 0 20px}
+  .prospectrow{display:flex;gap:9px;margin:2px 0 20px}
+  .gpbtn,.dndbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;border-radius:11px;padding:13px 10px;font-family:'Oswald',sans-serif;font-weight:600;font-size:13px;letter-spacing:.6px;text-transform:uppercase;cursor:pointer}
+  .gpbtn{border:1.5px solid var(--green);color:var(--green)}
+  .gpbtn.on{background:var(--green);border-color:var(--green);color:#06231a}
+  .dndbtn{border:1.5px solid var(--red);color:#ef6a5e}
   .dndbtn.on{background:var(--red);border-color:var(--red);color:#fff}
-  .dndbtn svg{width:17px;height:17px}
+  .gpbtn svg,.dndbtn svg{width:16px;height:16px;flex:none}
+  .pdot{width:11px;height:11px;border-radius:50%;flex:none}
+  .pdot.gp{background:var(--green);box-shadow:0 0 0 3px rgba(63,191,127,.18)}
+  .pdot.dnd{background:var(--red);box-shadow:0 0 0 3px rgba(224,90,78,.18)}
+  .dbadge.gpb{color:#06231a;background:var(--green);border:1px solid var(--green);margin-left:6px;display:inline-flex;align-items:center;gap:5px}
+  .dbadge.gpb svg{width:12px;height:12px}
   .dhead.dnd .dname{color:#ef6a5e;text-decoration:line-through;text-decoration-color:rgba(239,106,94,.5);text-decoration-thickness:2px}
   .dbadge.dndb{color:#fff;background:var(--red);border:1px solid var(--red);margin-left:6px;display:inline-flex;align-items:center;gap:5px}
   .dbadge.dndb svg{width:12px;height:12px}
@@ -168,6 +195,10 @@
   .rt-r:last-child{border-bottom:none}
   .rt-num{width:26px;font-family:'Oswald',sans-serif;font-weight:700;color:var(--gold2)}
   .rt-name{flex:1;font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;letter-spacing:.3px;text-transform:uppercase;min-width:0;color:var(--gold)}
+  .rt-pickh{width:62px;flex:none}
+  .rt-pick{width:62px;flex:none;display:flex;flex-direction:column;line-height:1.05}
+  .rt-ord{font-family:'Oswald',sans-serif;font-weight:700;font-size:17px;color:var(--gold)}
+  .rt-ovr{font-size:9.5px;color:var(--dim);letter-spacing:.2px;margin-top:2px}
   .rt-ht,.rt-wt,.rt-age{width:52px;text-align:right;font-size:13px;color:var(--mute)}
   .rt-r .rt-chev{width:16px;text-align:right;color:var(--dim)}
   .rt-r .rt-chev svg{width:14px;height:14px}
@@ -476,7 +507,14 @@ const tagBag=()=>S.tags[coachKey()]||(S.tags[coachKey()]={});
 const noteOf=id=>isCoach()?((S.notes[coachKey()]||{})[id]||""):"";
 const tagsOf=id=>isCoach()?((S.tags[coachKey()]||{})[id]||[]):[];
 const DND="DO NOT DRAFT";
+const GP="GREAT PROSPECT";
 const isDND=id=>tagsOf(id).includes(DND);
+const isGP=id=>tagsOf(id).includes(GP);
+function toggleProspect(pid,kind){ if(!isCoach())return;
+  const b=tagBag(); let arr=b[pid]||(b[pid]=[]);
+  const on=kind==="gp"?GP:DND, off=kind==="gp"?DND:GP, had=arr.includes(on);
+  arr=arr.filter(t=>t!==on&&t!==off); if(!had)arr.push(on);   // mutually exclusive
+  if(arr.length)b[pid]=arr; else delete b[pid]; openPlayer(pid); }
 const inTeamQueue=id=>isCoach()&&S.queues[S.coachTeam].includes(id);
 const picksMade=()=>PLAYERS.filter(p=>p.drafted).length;
 const onClockTeamId=()=>{const i=picksMade();return i<ORDER.length?ORDER[i]:null;};
@@ -538,7 +576,7 @@ function sortedAvailable(){ let a=PLAYERS.filter(p=>!p.drafted);
     age:(x,y)=>(x.age||0)-(y.age||0),height:(x,y)=>(x.hIn||0)-(y.hIn||0),exp:(x,y)=>(x.campExp||0)-(y.campExp||0),
     forty:(x,y)=>(x.forty??999)-(y.forty??999)};
   a.sort(cmp[S.sort]||cmp.name); if(S.sortDir==="desc")a.reverse(); return a; }
-function setSort(k){ if(S.sort===k){S.sortDir=S.sortDir==="asc"?"desc":"asc";} else {S.sort=k;S.sortDir=(k==="name"||k==="forty")?"asc":"desc";} render(); }
+function setSort(k){ if(S.sort===k){S.sortDir=S.sortDir==="asc"?"desc":"asc";} else {S.sort=k;S.sortDir=(k==="name"||k==="forty")?"asc":"desc";} render(); animateIn($("plist")); }
 
 /* ================= VIEW-AS ================= */
 function viewLabel(){ if(S.role==="moderator")return "View as Moderator";
@@ -565,7 +603,12 @@ function render(){
   renderNav();
   const v=S.view;
   if(v==="board")renderBoard(); else if(v==="players")renderPlayers(); else if(v==="queue")renderQueue(); else if(v==="rosters")renderRosters();
+  const sig=v+"|"+S.divKey+"|"+S.rosterTeam;   // fade only when the view/division/roster level actually changes
+  if(sig!==_viewSig) animateIn($("view"));
+  _viewSig=sig;
 }
+let _viewSig=null;
+function animateIn(el){ if(!el)return; el.classList.remove("anim-in"); void el.offsetWidth; el.classList.add("anim-in"); }
 function renderNav(){
   const tabs=[["board","Board",I.nBoard],["players","Players",I.nPlayers],["queue","Queue",I.nQueue],["rosters","Rosters",I.nRosters]];
   let qbadge=0; if(isCoach())qbadge=S.queues[S.coachTeam].filter(id=>!PLAYERS.find(p=>p.id===id).drafted).length;
@@ -615,33 +658,38 @@ function renderBoard(){
 function openOrderEditor(){ if(S.role!=="moderator")return;
   const rows=S.seed.map((tid,i)=>{const t=teamById(tid);return `<div class="qrow"><span class="q-idx">${i+1}</span>${crest(tid)}<div class="q-body"><div class="q-name">${t.name}</div></div><div class="q-handle"><button onclick="moveSeed(${tid},-1)">▲</button><button onclick="moveSeed(${tid},1)">▼</button></div></div>`;}).join("");
   $("sheet").innerHTML=`<div class="sh-top"><button class="ic" onclick="closeSheet()">${I.x}</button></div><div class="sh-body"><div class="dname" style="font-size:24px;margin-bottom:6px">DRAFT ORDER</div><div class="dsub" style="margin-bottom:16px">Round 1 order — the snake reverses each round. Picks already made stay put.</div>${rows}<div class="dactions" style="margin-top:14px"><button class="dbtn" onclick="closeSheet()">Done</button></div></div>`;
-  $("overlay").classList.add("show");
+  showSheet();
 }
 
 /* ---- PLAYERS ---- */
-function renderPlayers(){
+function renderPlayerList(){
   const list=sortedAvailable();
+  const el=$("plist"); if(!el) return;
+  el.innerHTML = list.length ? list.map(p=>playerCard(p)).join("") : `<div class="empty">No campers match “${escapeHtml(S.search)}”.</div>`;
+}
+function renderPlayers(){
   const has40=PLAYERS.some(p=>p.forty);
   if(S.sort==="forty"&&!has40) S.sort="name";
   const sorts=[["name","Name"],["age","Age"],["height","Height"],["weight","Weight"]];
   if(has40) sorts.push(["forty","40 Time"]);
   sorts.push(["exp","Experience"]);
-  let h=`<div class="controls"><div class="search">${I.search}<input id="searchBox" placeholder="Search players…" value="${escapeHtml(S.search)}"></div><button class="filterbtn">${I.filter}</button></div>`;
+  let h=`<div class="controls"><div class="search">${I.search}<input id="searchBox" placeholder="Search players…" value="${escapeHtml(S.search)}"></div></div>`;
   h+=`<div class="chips">`+sorts.map(([k,l])=>`<button class="chip ${S.sort===k?'on':''}" onclick="setSort('${k}')">${l}${S.sort===k?` <span class="ar">${S.sortDir==='asc'?'↑':'↓'}</span>`:''}</button>`).join("")+`</div>`;
-  h+=list.map(p=>playerCard(p)).join("");
-  if(!list.length)h+=`<div class="empty">No campers match “${escapeHtml(S.search)}”.</div>`;
+  h+=`<div id="plist"></div>`;
   $("view").innerHTML=h;
-  const sb=$("searchBox"); sb.oninput=e=>{S.search=e.target.value;renderPlayers();}; sb.onfocus=()=>{const v=sb.value;sb.value="";sb.value=v;};
+  renderPlayerList();
+  const sb=$("searchBox");
+  sb.oninput=e=>{ S.search=e.target.value; renderPlayerList(); };  // only re-render the list, keep the input focused
 }
 function playerCard(p){
-  const dnd=isDND(p.id), tags=tagsOf(p.id).filter(t=>t!==DND).slice(0,3), note=noteOf(p.id);
+  const dnd=isDND(p.id), gp=isGP(p.id), tags=tagsOf(p.id).filter(t=>t!==DND&&t!==GP).slice(0,3), note=noteOf(p.id);
   let action="";
   if(S.role==="moderator"&&!draftDone()&&!S.locked) action=`<button class="qbtn draft" onclick="event.stopPropagation();assign(${p.id})">Draft</button>`;
   else if(canQueue()){ action=inTeamQueue(p.id)?`<span class="qtag">${I.checkC} Queued</span>`:`<button class="qbtn" onclick="event.stopPropagation();toggleQueue(${p.id})">${I.plus} Queue</button>`; }
   else if(S.role==="assistant"&&inTeamQueue(p.id)) action=`<span class="qtag">${I.checkC} Queued</span>`;
   return `<div class="pcard ${dnd?'dnd':''}" onclick="openPlayer(${p.id})">
     <div class="pbody">
-      <div class="prow1"><span class="pname">${p.name}</span>${dnd?`<span class="badge-dnd">${I.ban} Do Not Draft</span>`:''}${p.campExp>0?`<span class="badge-ret">Returning</span>`:''}${p.flag?`<span class="warn" title="${p.flag}">${I.warn}</span>`:''}</div>
+      <div class="prow1"><span class="pname">${p.name}</span>${gp?`<span class="pdot gp" title="Great prospect"></span>`:''}${dnd?`<span class="pdot dnd" title="Do not draft"></span>`:''}${p.flag?`<span class="warn" title="${p.flag}">${I.warn}</span>`:''}</div>
       <div class="pmeta">${metaLine(p)}</div>
       ${(note||tags.length)?`<div class="pfoot">${note?`<span class="noteflag">${I.note}</span>`:''}${tags.map(t=>`<span class="ttag">${escapeHtml(t)}</span>`).join("")}</div>`:''}
     </div>
@@ -686,8 +734,8 @@ function renderRosters(){
     h+=`<div class="rd-head">${crest(t.id)}<div><div class="rd-title">${t.name}</div><div class="rd-sub">${roster.length} Players · Coach: ${t.coach}</div></div></div>`;
     if(!roster.length) h+=`<div class="empty">No players drafted to this team yet.</div>`;
     else{
-      h+=`<div class="rtable"><div class="rt-h"><span class="rt-name">Player</span><span class="rt-ht">HT</span><span class="rt-wt">WT</span><span class="rt-age">AGE</span><span class="rt-chev"></span></div>`;
-      roster.forEach(p=>{ h+=`<div class="rt-r" onclick="openPlayer(${p.id})"><span class="rt-name ${isDND(p.id)?'dnd-name':''}">${p.name}</span><span class="rt-ht">${fmtHt(p.height)}</span><span class="rt-wt">${p.weight??'—'}</span><span class="rt-age">${p.age??'—'}</span><span class="rt-chev">${I.chevR}</span></div>`; });
+      h+=`<div class="rtable"><div class="rt-h"><span class="rt-pickh">Pick</span><span class="rt-name">Player</span><span class="rt-ht">HT</span><span class="rt-wt">WT</span><span class="rt-age">AGE</span><span class="rt-chev"></span></div>`;
+      roster.forEach((p,i)=>{ h+=`<div class="rt-r" onclick="openPlayer(${p.id})"><span class="rt-pick"><span class="rt-ord">${i+1}</span>${p.pickNo?`<span class="rt-ovr">#${p.pickNo} overall</span>`:''}</span><span class="rt-name ${isDND(p.id)?'dnd-name':''}">${p.name}</span><span class="rt-ht">${fmtHt(p.height)}</span><span class="rt-wt">${p.weight??'—'}</span><span class="rt-age">${p.age??'—'}</span><span class="rt-chev">${I.chevR}</span></div>`; });
       h+=`</div>`;
     }
   }
@@ -697,7 +745,7 @@ function renderRosters(){
 /* ---- PLAYER DETAIL ---- */
 function openPlayer(pid){
   const p=PLAYERS.find(x=>x.id===pid);
-  const drafted=p.drafted, tm=drafted?teamById(p.teamId):null, dnd=isDND(p.id);
+  const drafted=p.drafted, tm=drafted?teamById(p.teamId):null, dnd=isDND(p.id), gp=isGP(p.id);
   const badge=drafted?`<span class="dbadge dr">Drafted #${p.pickNo} · ${tm.name}</span>`:`<span class="dbadge av">Available</span>`;
   // history — only shown when we have verified year-by-year data on file
   const histHtml=(p.history&&p.history.length)
@@ -716,7 +764,10 @@ function openPlayer(pid){
     const chips=S.tagVocab.map(tag=>`<span class="etag ${mine.includes(tag)?'on':''}" onclick="toggleTag(${p.id},'${tag.replace(/'/g,"\\'")}')">${escapeHtml(tag)}</span>`).join("");
     coachTools=`<div class="dsec">Evaluation — your tags</div><div class="tagwrap">${chips}</div>
       <div class="addtag"><input id="customTag" placeholder="Add a trait…" onkeydown="if(event.key==='Enter')addCustomTag(${p.id})"><button onclick="addCustomTag(${p.id})">Add</button></div>
-      <button class="dndbtn ${dnd?'on':''}" onclick="toggleTag(${p.id},'DO NOT DRAFT')">${I.ban} ${dnd?'Marked — Do Not Draft':'Do Not Draft'}</button>
+      <div class="prospectrow">
+        <button class="gpbtn ${gp?'on':''}" onclick="toggleProspect(${p.id},'gp')">${I.check} ${gp?'Great Prospect ✓':'Great Prospect'}</button>
+        <button class="dndbtn ${dnd?'on':''}" onclick="toggleProspect(${p.id},'dnd')">${I.ban} ${dnd?'Do Not Draft ✓':'Do Not Draft'}</button>
+      </div>
       <div class="dsec">Private notes</div><div class="notebox"><textarea class="note" placeholder="e.g. strong blocker, coachable, plays bigger than his size…" oninput="setNote(${p.id},this.value)">${escapeHtml(note)}</textarea></div>`;
   }
   // actions
@@ -731,7 +782,7 @@ function openPlayer(pid){
   $("sheet").innerHTML=`
     <div class="sh-top"><button class="ic" onclick="closeSheet()">${I.back}</button></div>
     <div class="sh-body">
-      <div class="dhead ${dnd?'dnd':''}"><div><div class="dname">${p.name}</div>${badge}${dnd?`<span class="dbadge dndb">${I.ban} Do Not Draft</span>`:''}<div class="dsub">${p.campExp} yr${p.campExp!==1?'s':''} camp · ${p.level==='PW'?'PeeWee':p.level} · ${p.age??'—'} yrs old</div></div>${crest(drafted?p.teamId:S.coachTeam)}</div>
+      <div class="dhead ${dnd?'dnd':''}"><div><div class="dname">${p.name}</div>${badge}${gp?`<span class="dbadge gpb">${I.check} Great Prospect</span>`:''}${dnd?`<span class="dbadge dndb">${I.ban} Do Not Draft</span>`:''}<div class="dsub">${p.campExp} yr${p.campExp!==1?'s':''} camp · ${p.level==='PW'?'PeeWee':p.level} · ${p.age??'—'} yrs old</div></div>${crest(drafted?p.teamId:S.coachTeam)}</div>
       ${p.flag?`<div class="warnrow">${I.warn}<span>${p.flag} — worth confirming in the source sheet.</span></div>`:''}
       <div class="statgrid">${gridHtml}</div>
       ${statsBlock(p)}
@@ -739,9 +790,13 @@ function openPlayer(pid){
       ${histHtml}
       ${actions}
     </div>`;
-  $("overlay").classList.add("show");
+  showSheet();
 }
-function closeSheet(){ $("overlay").classList.remove("show"); $("sheet").classList.remove("settings"); S.setPage=null; render(); }
+let _sheetT=null;
+function showSheet(){ clearTimeout(_sheetT); const ov=$("overlay"),sh=$("sheet"); sh.classList.remove("closing"); ov.classList.remove("closing"); ov.classList.add("show"); }
+function closeSheet(){ const ov=$("overlay"),sh=$("sheet"); if(!ov.classList.contains("show"))return;
+  sh.classList.add("closing"); ov.classList.add("closing"); clearTimeout(_sheetT);
+  _sheetT=setTimeout(()=>{ ov.classList.remove("show","closing"); sh.classList.remove("settings","closing"); S.setPage=null; render(); },200); }
 
 /* ================= DIVISIONS ================= */
 const DIVISIONS=[
@@ -921,7 +976,7 @@ function renderSettings(){
   else if(P==="account")body=pageAccount(); else if(P==="help")body=pageHelp(); else body=`<div class="set-content">${CONTENT[P]||""}</div>`;
   $("sheet").innerHTML=`<div class="sh-top"><button class="ic" onclick="${back}">${I.back}</button></div>
     <div class="set-page"><div class="set-head"><div class="ttl">${titles[P]||"Settings"}</div></div>${body}</div>`;
-  $("sheet").classList.add("settings"); $("overlay").classList.add("show");
+  $("sheet").classList.add("settings"); showSheet();
 }
 
 /* ================= MISC ================= */
