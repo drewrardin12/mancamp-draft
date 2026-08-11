@@ -709,8 +709,9 @@ function renderBoard(){
   const done=draftDone(), clockTid=onClockTeamId(), t=clockTid?teamById(clockTid):null, {rd,pir}=roundInfo();
   let h="";
   // banner
-  if(done){
-    h+=`<div class="banner"><div class="bcrest">${headerLogo}</div><div class="bmain"><div class="bmeta"><span class="gdot" style="background:var(--gold);animation:none;box-shadow:none"></span> DRAFT COMPLETE</div><div class="btitle">ALL ${picksMade()} CAMPERS PLACED</div></div></div>`;
+  if(done||S.locked){
+    const lbl=done?"DRAFT COMPLETE":"DRAFT LOCKED", ttl=done?`ALL ${picksMade()} CAMPERS PLACED`:`${picksMade()} OF ${PLAYERS.length} CAMPERS PLACED`;
+    h+=`<div class="banner"><div class="bcrest">${headerLogo}</div><div class="bmain"><div class="bmeta"><span class="gdot" style="background:var(--gold);animation:none;box-shadow:none"></span> ${lbl}</div><div class="btitle">${ttl}</div></div></div>`;
   }else{
     h+=`<div class="banner"><div class="bcrest">${crest(clockTid)}</div><div class="bmain">
       <div class="bmeta"><span class="gdot"></span> ROUND ${rd} • PICK ${pir} • ${picksMade()+1} OF ${PLAYERS.length}</div>
@@ -1026,6 +1027,13 @@ function setTeamName(id,v){ const t=teamById(id); t.name=v||"Team"; const w=t.na
 function setTeamColor(id,c){ teamById(id).color=c; renderSettings(); }
 function setTeamCoach(id,v){ teamById(id).coach=v||"Coach TBD"; }
 function toggleLock(){ S.locked=!S.locked; toast(S.locked?"Draft locked":"Draft unlocked"); renderSettings(); }
+function confirmEndDraft(){ if(S.role!=="moderator")return;
+  if(S.locked){ askConfirm({title:"Reopen the draft?",sub:"This unlocks the draft so picks can be made again.",confirmLabel:"Reopen Draft",run:()=>{ S.locked=false; toast("Draft reopened"); renderSettings(); },cancel:()=>renderSettings()}); return; }
+  const placed=picksMade(), total=PLAYERS.length, left=total-placed;
+  askConfirm({ title:"End &amp; lock the draft?",
+    sub:`${placed} of ${total} campers placed${left>0?` — ${left} still undrafted`:''}. This ends the draft and stops all further picks. You can still move players between teams afterward, and reopen the draft from Settings if you need to.`,
+    confirmLabel:"End & Lock Draft", danger:true,
+    run:()=>{ S.locked=true; toast("Draft ended & locked"); renderSettings(); }, cancel:()=>renderSettings() }); }
 function resetDraft(){ if(!S._cr){ S._cr=true; renderSettings(); setTimeout(()=>{S._cr=false;},4000); return; }
   S._cr=false; PLAYERS.forEach(p=>{p.drafted=false;p.teamId=null;p.pickNo=null;}); S.seq=0; S.locked=false; toast("Draft reset"); setPage("main"); }
 function exportCSV(){
@@ -1131,9 +1139,12 @@ function pageTeams(){
       <div class="lbl">Logo</div><button class="dbtn ghost" style="width:100%;margin-top:6px" onclick="toast('Logo upload is wired in the full app')">Upload logo</button></div>`).join("");
 }
 function pageControls(){
+  const endRow = S.locked
+    ? `<div class="set-row" onclick="confirmEndDraft()"><span class="si" style="color:var(--green)">${I.checkC}</span><span class="sl">Draft ended &amp; locked<div class="ssub">No new picks — tap to reopen the draft</div></span><span class="sv"><span class="toggle on"><span class="knob"></span></span></span></div>`
+    : `<div class="set-row" onclick="confirmEndDraft()"><span class="si">${I.ban}</span><span class="sl">End &amp; lock the draft<div class="ssub">Finalize picks so no more can be made</div></span><span class="sv"><span class="toggle"><span class="knob"></span></span></span></div>`;
   return `${setRow(I.nBoard,"Change draft order","","openOrderEditor()")}
-    <div class="set-row" onclick="toggleLock()"><span class="si">${I.ban}</span><span class="sl">${S.locked?'Unlock draft':'Lock / finish draft'}</span><span class="sv"><span class="toggle ${S.locked?'on':''}"><span class="knob"></span></span></span></div>
-    <div class="hint" style="margin:4px 2px 16px">Locking freezes the draft so no more picks or changes can be made.</div>
+    ${endRow}
+    <div class="hint" style="margin:4px 2px 16px">The moderator can end the draft at any time — it stops all further picks. You can still move players between teams (and, later, divisions) and reopen the draft from here afterward; locking only prevents new picks.</div>
     <div class="set-row danger" onclick="resetDraft()"><span class="si">${I.undo}</span><span class="sl">${S._cr?'Tap again to confirm reset':'Reset draft'}</span><span class="sv">${I.chevR}</span></div>`;
 }
 function pageData(){
