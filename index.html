@@ -482,7 +482,7 @@ const onClockTeamId=()=>{const i=picksMade();return i<ORDER.length?ORDER[i]:null
 const draftDone=()=>picksMade()>=ORDER.length||PLAYERS.every(p=>p.drafted);
 function roundInfo(i){i=(i==null?picksMade():i);return{rd:Math.floor(i/TEAMS.length)+1,pir:i%TEAMS.length+1};}
 function fmtHt(h){return h?h.replace('-',"'")+'"':'—';}
-function metaLine(p){const yr=p.campExp>0?` • ${p.campExp} Camp Year${p.campExp>1?'s':''}`:'';const forty=p.forty?` • ${p.forty}s 40`:'';return `${fmtHt(p.height)} • ${p.weight??'—'} lbs • Age ${p.age??'—'}${forty}${yr}`;}
+function metaLine(p){return `${fmtHt(p.height)} • ${p.weight??'—'} lbs • Age ${p.age??'—'}`;}
 function statsBlock(p){
   const s=p.stats; if(!s) return "";
   const L=[];
@@ -689,9 +689,16 @@ function openPlayer(pid){
   const p=PLAYERS.find(x=>x.id===pid);
   const drafted=p.drafted, tm=drafted?teamById(p.teamId):null, dnd=isDND(p.id);
   const badge=drafted?`<span class="dbadge dr">Drafted #${p.pickNo} · ${tm.name}</span>`:`<span class="dbadge av">Available</span>`;
-  // history
-  let hist=""; if(p.campExp>0){ for(let i=1;i<=p.campExp;i++){ hist+=`<div class="hist-row"><span class="hist-yr">${2026-i}</span><span class="hist-what">PeeWee Camper</span></div>`; } }
-  else hist=`<div class="hist-row"><span class="hist-yr">2026</span><span class="hist-what">First year at camp</span></div>`;
+  // history — only shown when we have verified year-by-year data on file
+  const histHtml=(p.history&&p.history.length)
+    ? `<div class="dsec">History</div><div class="hist">`+p.history.map(h=>`<div class="hist-row"><span class="hist-yr">${h.year}</span><span class="hist-what">${escapeHtml(h.what)}</span></div>`).join("")+`</div>`
+    : "";
+  // stat tiles (40 time & varsity years shown only when present)
+  const tiles=[["Height",fmtHt(p.height)],["Weight (lb)",p.weight??'—'],["Age",p.age??'—']];
+  if(p.forty) tiles.push(["40 Time",p.forty+"s"]);
+  tiles.push(["Push-ups",p.pushups??'—'],["Sit-ups",p.situps??'—'],["Camp Yrs",p.campExp??0]);
+  if(p.varsityExp>0) tiles.push(["Varsity Yrs",p.varsityExp]);
+  const gridHtml=tiles.map(([k,v])=>`<div class="stat"><div class="v">${v}</div><div class="k">${k}</div></div>`).join("");
   // coach tools
   let coachTools="";
   if(isCoach()){
@@ -716,17 +723,10 @@ function openPlayer(pid){
     <div class="sh-body">
       <div class="dhead ${dnd?'dnd':''}"><div><div class="dname">${p.name}</div>${badge}${dnd?`<span class="dbadge dndb">${I.ban} Do Not Draft</span>`:''}<div class="dsub">${p.campExp} yr${p.campExp!==1?'s':''} camp · ${p.level==='PW'?'PeeWee':p.level} · ${p.age??'—'} yrs old</div></div>${crest(drafted?p.teamId:S.coachTeam)}</div>
       ${p.flag?`<div class="warnrow">${I.warn}<span>${p.flag} — worth confirming in the source sheet.</span></div>`:''}
-      <div class="statgrid">
-        <div class="stat"><div class="v">${fmtHt(p.height)}</div><div class="k">Height</div></div>
-        <div class="stat"><div class="v">${p.weight??'—'}</div><div class="k">Weight (lb)</div></div>
-        <div class="stat"><div class="v">${p.age??'—'}</div><div class="k">Age</div></div>
-        <div class="stat"><div class="v">${p.pushups??'—'}</div><div class="k">Push-ups</div></div>
-        <div class="stat"><div class="v">${p.situps??'—'}</div><div class="k">Sit-ups</div></div>
-        <div class="stat"><div class="v">${p.campExp}</div><div class="k">Camp Yrs</div></div>
-      </div>
+      <div class="statgrid">${gridHtml}</div>
       ${statsBlock(p)}
       ${coachTools}
-      <div class="dsec">History</div><div class="hist">${hist}</div>
+      ${histHtml}
       ${actions}
     </div>`;
   $("overlay").classList.add("show");
