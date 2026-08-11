@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Man Camp Draft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0b0d; --bg2:#0e0e11; --card:#151517; --card2:#1a1a1e; --line:#2a2a2f; --line2:#37373d;
+    --ink:#f3f3f4; --mute:#8c8c93; --dim:#5f5f66;
+    --gold:#d9a94a; --gold2:#f0c778; --goldsoft:#2a2312;
+    --tblue:#3f6fd6; --tred:#cf4436; --tgreen:#2fa25a; --tblack:#3a4048;
+    --green:#3fbf7f; --red:#e05a4e;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Barlow',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  .app{max-width:520px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:80px;
+    background:radial-gradient(120% 60% at 100% 0%, #16130c 0%, rgba(11,11,13,0) 55%), var(--bg)}
+  .osw{font-family:'Oswald',sans-serif}
+  svg{display:block}
+
+  /* ---------- Header ---------- */
+  .topbar{position:sticky;top:0;z-index:40;background:linear-gradient(180deg,#101012,#0b0b0d);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;padding:12px 16px 10px}
+  .brandlogo svg{width:38px;height:40px}
+  .brandtitle{font-family:'Oswald',sans-serif;font-weight:700;font-size:19px;letter-spacing:1px}
+  .brandtitle b{color:var(--gold)}
+  .brandsub{font-size:11.5px;color:var(--mute);letter-spacing:.6px;margin-top:-1px}
+  .gear{margin-left:auto;background:none;border:none;color:var(--gold);cursor:pointer;padding:4px}
+  .gear svg{width:22px;height:22px}
+  .viewas{display:flex;align-items:center;gap:10px;width:100%;background:#0e0e11;border:none;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:11px 16px;color:var(--ink);cursor:pointer;text-align:left;font-family:inherit}
+  .viewas .vicon svg{width:17px;height:17px}
+  .viewas .vtext{font-size:14px;font-weight:600}
+  .viewas.locked{cursor:default}
+  .viewas .vchev{margin-left:auto;color:var(--mute)}
+  .viewas .vchev svg{width:16px;height:16px}
+  .viewmenu{display:none;position:absolute;left:0;right:0;top:100%;z-index:60;background:#141417;border-bottom:1px solid var(--line);box-shadow:0 18px 40px rgba(0,0,0,.6)}
+  .viewmenu.open{display:block}
+  .vm-group{padding:6px 0}
+  .vm-lbl{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);padding:8px 16px 3px}
+  .vm-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;font-size:14px;color:var(--ink)}
+  .vm-item:hover{background:#1c1c20}
+  .vm-item.sel{color:var(--gold)}
+  .vm-item .sw{width:11px;height:11px;border-radius:3px;border:1px solid rgba(255,255,255,.25)}
+  .vm-item .chk{margin-left:auto;color:var(--gold)}
+  .vm-item .chk svg{width:16px;height:16px}
+
+  /* ---------- Views ---------- */
+  .view{padding:14px 16px 16px}
+  .secrow{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 10px}
+  h2.sec{font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink);margin:0}
+  .link{font-size:12px;font-weight:700;letter-spacing:.4px;color:var(--gold);text-transform:uppercase;cursor:pointer}
+  .rounds{font-size:12px;font-weight:600;letter-spacing:.5px;color:var(--mute);text-transform:uppercase;display:flex;align-items:center;gap:5px}
+  .rounds svg{width:13px;height:13px}
+
+  /* ---------- Crest ---------- */
+  .crest{display:inline-block;vertical-align:middle}
+
+  /* ---------- Banner ---------- */
+  .banner{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#1b1b1f,#131316);border:1px solid var(--line2);border-radius:16px;padding:15px 16px;margin-top:14px}
+  .banner .bcrest svg{width:46px;height:50px}
+  .bmeta{display:flex;align-items:center;gap:8px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;color:var(--gold2);text-transform:uppercase}
+  .gdot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(63,191,127,.22);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 2px rgba(63,191,127,.3)}70%{box-shadow:0 0 0 8px rgba(63,191,127,0)}100%{box-shadow:0 0 0 2px rgba(63,191,127,0)}}
+  .btitle{font-family:'Oswald',sans-serif;font-weight:700;font-size:22px;letter-spacing:.4px;line-height:1.05;margin-top:5px}
+  .bbtns{display:flex;gap:11px;margin-top:12px}
+  .bbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;border:1.5px solid var(--gold);color:var(--gold);
+    border-radius:11px;padding:12px;font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;letter-spacing:.8px;text-transform:uppercase;cursor:pointer}
+  .bbtn svg{width:16px;height:16px}
+  .bbtn:active{background:rgba(217,169,74,.12)}
+
+  /* ---------- Recent picks ---------- */
+  .rpick{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:8px}
+  .rp-rp{font-family:'Oswald',sans-serif;font-size:12px;color:var(--gold2);letter-spacing:.5px;min-width:44px}
+  .rpick .crest svg{width:22px;height:24px}
+  .rp-team{font-weight:600;font-size:14px}
+  .rp-num{margin-left:auto;color:var(--dim);font-size:12px;font-weight:600}
+  .rp-name{font-weight:600;font-size:14px;min-width:96px;text-align:right}
+
+  /* ---------- Board grid ---------- */
+  .board-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+  table.board{border-collapse:collapse;width:100%;font-size:11px}
+  table.board th,table.board td{border:1px solid var(--line);padding:7px 8px;text-align:left;min-width:86px;vertical-align:top}
+  table.board th{position:sticky;top:0;background:#1c1c20;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.4px}
+  table.board th.rd,table.board td.rd{min-width:30px;text-align:center;color:var(--mute);font-family:'Oswald',sans-serif;background:#141417}
+  .thteam{display:flex;align-items:center;gap:6px}
+  .thteam .crest svg{width:18px;height:20px}
+  .thteam span{line-height:1.05}
+  table.board td .pknum{color:var(--dim);font-size:10px;font-weight:700;font-family:'Oswald',sans-serif}
+  table.board td .pkname{font-weight:600;color:var(--ink);font-size:11.5px;margin-top:1px}
+  table.board td.empty .pknum{color:#42424a}
+  table.board td.clock{background:rgba(217,169,74,.10);outline:2px solid var(--gold);outline-offset:-2px}
+  table.board td.clock .oc{color:var(--gold);font-family:'Oswald',sans-serif;font-weight:600;font-size:10px;letter-spacing:.5px;margin-top:2px}
+
+  /* ---------- Player cards ---------- */
+  .controls{display:flex;gap:10px;margin-bottom:12px}
+  .search{flex:1;display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0 12px}
+  .search svg{width:17px;height:17px;color:var(--mute);flex:none}
+  .search input{flex:1;background:none;border:none;color:var(--ink);font-size:14px;font-family:inherit;padding:11px 0;outline:none}
+  .filterbtn{width:46px;border:1px solid var(--line);background:var(--card);border-radius:12px;color:var(--mute);cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .filterbtn svg{width:18px;height:18px}
+  .chips{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;margin-bottom:12px}
+  .chip{flex:none;background:var(--card);border:1px solid var(--line);color:var(--mute);border-radius:20px;padding:7px 14px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:5px}
+  .chip.on{background:var(--gold);border-color:var(--gold);color:#111;font-weight:600}
+  .chip .ar{font-size:11px}
+
+  .pcard{display:flex;align-items:flex-start;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:9px;cursor:pointer}
+  .pnum{font-family:'Oswald',sans-serif;font-weight:700;font-size:20px;color:var(--ink);min-width:26px;text-align:center;line-height:1.5}
+  .pnum.flag{color:var(--red)}
+  .pbody{flex:1;min-width:0}
+  .prow1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .pname{font-family:'Oswald',sans-serif;font-weight:600;font-size:16px;letter-spacing:.3px;text-transform:uppercase}
+  .badge-ret{font-family:'Oswald',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.5px;color:var(--gold2);border:1px solid #4a3d1e;background:var(--goldsoft);border-radius:5px;padding:2px 6px;text-transform:uppercase}
+  .warn{margin-left:auto;color:var(--red)}
+  .warn svg{width:18px;height:18px}
+  .pmeta{font-size:12.5px;color:var(--mute);margin-top:4px}
+  .pfoot{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .noteflag{display:inline-flex;align-items:center;gap:4px;color:var(--mute);font-size:11px}
+  .noteflag svg{width:14px;height:14px}
+  .ttag{font-family:'Oswald',sans-serif;font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--mute);border:1px solid var(--line2);background:#101013;border-radius:6px;padding:3px 8px}
+  .paction{align-self:center}
+  .qbtn{background:transparent;border:1.5px solid var(--gold);color:var(--gold);border-radius:10px;padding:9px 13px;font-family:'Oswald',sans-serif;font-weight:600;font-size:12px;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .qbtn svg{width:14px;height:14px}
+  .qbtn.queued{border-color:#4a3d1e;color:var(--gold2);cursor:default}
+  .qbtn.draft{background:var(--gold);border-color:var(--gold);color:#111}
+  .qtag{font-family:'Oswald',sans-serif;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--gold2);display:flex;align-items:center;gap:6px}
+  .qtag svg{width:15px;height:15px}
+  .hint{font-size:12px;color:var(--mute);margin:2px 2px 10px}
+  .empty{color:var(--dim);font-style:italic;font-size:13px;padding:26px 12px;text-align:center}
+  /* ---------- Do Not Draft ---------- */
+  .pcard.dnd{border-color:#7a2b26;background:linear-gradient(180deg,rgba(224,90,78,.09),rgba(224,90,78,.02))}
+  .pcard.dnd .pname{color:#ef6a5e;text-decoration:line-through;text-decoration-color:rgba(239,106,94,.55);text-decoration-thickness:2px}
+  .badge-dnd{display:inline-flex;align-items:center;gap:4px;font-family:'Oswald',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.6px;color:#fff;background:var(--red);border-radius:5px;padding:3px 7px;text-transform:uppercase}
+  .badge-dnd svg{width:11px;height:11px}
+  .dnd-name{color:#ef6a5e !important;text-decoration:line-through;text-decoration-color:rgba(239,106,94,.55);text-decoration-thickness:2px}
+  .dndbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;background:transparent;border:1.5px solid var(--red);color:#ef6a5e;border-radius:11px;padding:13px;font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;margin:2px 0 20px}
+  .dndbtn.on{background:var(--red);border-color:var(--red);color:#fff}
+  .dndbtn svg{width:17px;height:17px}
+  .dhead.dnd .dname{color:#ef6a5e;text-decoration:line-through;text-decoration-color:rgba(239,106,94,.5);text-decoration-thickness:2px}
+  .dbadge.dndb{color:#fff;background:var(--red);border:1px solid var(--red);margin-left:6px;display:inline-flex;align-items:center;gap:5px}
+  .dbadge.dndb svg{width:12px;height:12px}
+
+  /* ---------- Rosters ---------- */
+  .rtabs{display:flex;gap:20px;overflow-x:auto;border-bottom:1px solid var(--line);margin:0 -16px 14px;padding:0 16px}
+  .rtab{flex:none;background:none;border:none;color:var(--mute);font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;padding:2px 0 11px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .rtab.on{color:var(--gold);border-bottom-color:var(--gold)}
+  .tcard{display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--line);border-left-width:4px;border-radius:13px;padding:14px;margin-bottom:11px;cursor:pointer}
+  .tcard .crest svg{width:40px;height:44px}
+  .tc-name{font-family:'Oswald',sans-serif;font-weight:700;font-size:19px;letter-spacing:.5px;text-transform:uppercase}
+  .tc-coach{font-size:12px;color:var(--mute);letter-spacing:.3px;margin-top:2px}
+  .tc-right{margin-left:auto;text-align:right;display:flex;align-items:center;gap:10px}
+  .tc-count{font-family:'Oswald',sans-serif;font-weight:700;font-size:20px;line-height:1}
+  .tc-count small{display:block;font-size:9.5px;font-weight:500;letter-spacing:.6px;color:var(--mute);text-transform:uppercase;margin-top:2px}
+  .tc-right svg{width:16px;height:16px;color:var(--dim)}
+  .rd-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .rd-head .crest svg{width:40px;height:44px}
+  .rd-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:22px;letter-spacing:.5px;text-transform:uppercase}
+  .rd-sub{font-size:12px;color:var(--mute);letter-spacing:.4px}
+  .rtable{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .rt-h,.rt-r{display:flex;align-items:center;padding:11px 14px;gap:10px}
+  .rt-h{background:#1a1a1e;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.6px;color:var(--mute);text-transform:uppercase;border-bottom:1px solid var(--line)}
+  .rt-r{border-bottom:1px solid #202024;cursor:pointer}
+  .rt-r:last-child{border-bottom:none}
+  .rt-num{width:26px;font-family:'Oswald',sans-serif;font-weight:700;color:var(--gold2)}
+  .rt-name{flex:1;font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;letter-spacing:.3px;text-transform:uppercase;min-width:0;color:var(--gold)}
+  .rt-ht,.rt-wt,.rt-age{width:52px;text-align:right;font-size:13px;color:var(--mute)}
+  .rt-r .rt-chev{width:16px;text-align:right;color:var(--dim)}
+  .rt-r .rt-chev svg{width:14px;height:14px}
+  .rt-h .rt-ht,.rt-h .rt-wt,.rt-h .rt-age{color:var(--mute)}
+
+  /* ---------- Queue ---------- */
+  .qhead{display:flex;align-items:center;margin:8px 2px 14px}
+  .qhead h2{font-family:'Oswald',sans-serif;font-weight:700;font-size:22px;letter-spacing:.5px;text-transform:uppercase;margin:0}
+  .qhead .qsub{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1px;color:var(--mute);text-transform:uppercase;margin-top:2px}
+  .qhead .qedit{margin-left:auto;background:none;border:none;color:var(--gold);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+  .qrow{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px 13px;margin-bottom:9px}
+  .qrow.gone{opacity:.4}
+  .q-idx{font-family:'Oswald',sans-serif;font-weight:700;font-size:17px;color:var(--gold2);min-width:20px;text-align:center}
+  .qrow .crest svg{width:30px;height:33px}
+  .q-body{flex:1;min-width:0}
+  .q-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;letter-spacing:.3px;text-transform:uppercase}
+  .q-meta{font-size:12px;color:var(--mute);margin-top:1px}
+  .q-dots{background:none;border:none;color:var(--mute);cursor:pointer;padding:4px}
+  .q-dots svg{width:20px;height:20px}
+  .q-x{background:none;border:none;color:var(--mute);cursor:pointer;padding:4px}
+  .q-x svg{width:20px;height:20px}
+  .q-handle{color:var(--dim);display:flex;flex-direction:column;gap:3px}
+  .q-handle button{background:#202024;border:1px solid var(--line2);color:var(--ink);border-radius:5px;width:26px;height:19px;cursor:pointer;font-size:10px;line-height:1}
+  .qfoot{font-size:12px;color:var(--dim);text-align:center;padding:8px 20px 4px;font-style:italic}
+  .qclear{width:100%;background:var(--red);border:none;color:#fff;border-radius:12px;padding:14px;font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;margin-top:8px}
+  .qreorder{font-size:12px;color:var(--mute);text-align:center;margin-bottom:12px}
+
+  /* ---------- Bottom nav ---------- */
+  .nav{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;background:#0d0d10;border-top:1px solid var(--line);display:flex;z-index:50}
+  .nav button{flex:1;background:none;border:none;color:var(--mute);padding:10px 4px 11px;font-family:'Oswald',sans-serif;font-size:10.5px;font-weight:500;letter-spacing:.7px;text-transform:uppercase;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+  .nav button .ic svg{width:22px;height:22px;display:block}
+  .nav button.on{color:var(--gold)}
+  .nav .bdg{position:absolute;top:5px;left:50%;transform:translateX(4px);background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:20px;padding:0 5px;font-family:'Barlow'}
+
+  /* ---------- Sheet / detail ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(3,4,6,.72);z-index:70;display:none;align-items:flex-end;justify-content:center}
+  .overlay.show{display:flex}
+  .sheet{background:var(--bg2);width:100%;max-width:520px;border-radius:22px 22px 0 0;border-top:1px solid var(--line2);max-height:92vh;overflow-y:auto;animation:up .24s ease}
+  @keyframes up{from{transform:translateY(30px);opacity:.5}to{transform:translateY(0);opacity:1}}
+  .sh-top{display:flex;align-items:center;padding:14px 16px 4px}
+  .sh-top .ic{background:none;border:none;color:var(--mute);cursor:pointer;padding:4px}
+  .sh-top .ic svg{width:22px;height:22px}
+  .sh-body{padding:6px 18px 26px}
+  .dhead{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+  .dname{font-family:'Oswald',sans-serif;font-weight:700;font-size:28px;line-height:1.02;letter-spacing:.3px;text-transform:uppercase}
+  .dbadge{display:inline-block;font-family:'Oswald',sans-serif;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;border-radius:6px;padding:3px 9px;margin:8px 0 7px}
+  .dbadge.av{color:var(--green);background:rgba(63,191,127,.12);border:1px solid rgba(63,191,127,.4)}
+  .dbadge.dr{color:var(--gold2);background:var(--goldsoft);border:1px solid #4a3d1e}
+  .dsub{font-size:12.5px;color:var(--mute);letter-spacing:.4px}
+  .dhead .crest{margin-left:auto}
+  .dhead .crest svg{width:46px;height:50px}
+  .statgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:18px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 6px;text-align:center}
+  .stat .v{font-family:'Oswald',sans-serif;font-weight:700;font-size:22px;color:var(--gold2)}
+  .stat .k{font-size:10px;letter-spacing:.5px;color:var(--mute);text-transform:uppercase;margin-top:3px}
+  .dsec{font-family:'Oswald',sans-serif;font-weight:600;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin:0 0 10px}
+  .warnrow{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--gold2);background:var(--goldsoft);border:1px solid #4a3d1e;border-radius:9px;padding:9px 12px;margin-bottom:16px}
+  .warnrow svg{width:16px;height:16px;flex:none}
+  .tagwrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:9px}
+  .etag{font-family:'Oswald',sans-serif;font-size:12px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--mute);border:1px solid var(--line2);background:var(--card);border-radius:8px;padding:7px 13px;cursor:pointer;user-select:none}
+  .etag.on{color:#111;background:var(--gold);border-color:var(--gold);font-weight:600}
+  .addtag{display:flex;gap:8px;margin-bottom:20px}
+  .addtag input{flex:1;background:var(--card);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:10px 12px;font-size:14px;font-family:inherit}
+  .addtag input:focus{outline:none;border-color:var(--gold)}
+  .addtag button{background:transparent;border:1.5px solid var(--gold);color:var(--gold);border-radius:10px;padding:0 16px;font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.5px;text-transform:uppercase;cursor:pointer}
+  .notebox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:20px}
+  textarea.note{width:100%;background:none;border:none;color:var(--ink);font-family:inherit;font-size:14px;line-height:1.5;min-height:70px;resize:vertical;outline:none}
+  .hist{margin-bottom:20px}
+  .hist-row{display:flex;gap:16px;padding:9px 2px;border-bottom:1px solid #202024;font-size:14px}
+  .hist-row:last-child{border-bottom:none}
+  .hist-yr{font-family:'Oswald',sans-serif;font-weight:600;color:var(--gold2);min-width:52px}
+  .hist-what{color:var(--mute)}
+  .posrow{margin-bottom:16px}
+  .posrow label{display:block;font-size:11px;letter-spacing:.4px;color:var(--mute);text-transform:uppercase;margin-bottom:7px}
+  select.possel{width:100%;background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:11px;padding:12px;font-size:15px}
+  select.possel:focus{outline:none;border-color:var(--gold)}
+  .dactions{display:flex;gap:10px;margin-top:6px}
+  .dbtn{flex:1;border-radius:12px;padding:14px;font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;border:1.5px solid var(--gold);background:var(--gold);color:#111}
+  .dbtn.ghost{background:transparent;color:var(--gold)}
+  .dbtn.danger{background:transparent;border-color:#5a2a26;color:var(--red)}
+  /* ---------- Settings ---------- */
+  .sheet.settings{max-height:94vh;min-height:82vh}
+  .set-page{padding:2px 18px 34px}
+  .set-head{margin-bottom:10px}
+  .set-head .ttl{font-family:'Oswald',sans-serif;font-weight:700;font-size:24px;letter-spacing:.4px;text-transform:uppercase}
+  .set-sec{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--mute);margin:18px 2px 9px}
+  .set-row{display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:9px;cursor:pointer}
+  .set-row .si{color:var(--gold);flex:none;display:flex}
+  .set-row .si svg{width:20px;height:20px}
+  .set-row .sl{font-weight:600;font-size:15px}
+  .set-row .ssub{font-size:12px;color:var(--mute);font-weight:400}
+  .set-row .sv{margin-left:auto;color:var(--mute);font-size:13px;display:flex;align-items:center;gap:8px}
+  .set-row .sv svg{width:16px;height:16px}
+  .set-row.danger .sl,.set-row.danger .si{color:var(--red)}
+  .set-content p{font-size:14.5px;line-height:1.6;color:var(--ink);margin:0 0 12px}
+  .set-content h4{font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.6px;text-transform:uppercase;color:var(--gold);margin:18px 0 9px}
+  .set-content ul{margin:0 0 14px;padding-left:20px}
+  .set-content li{font-size:14px;line-height:1.55;margin-bottom:7px;color:var(--ink)}
+  .set-in{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:11px;font-size:15px;font-family:inherit;margin-top:6px}
+  .set-in:focus{outline:none;border-color:var(--gold)}
+  .teamedit{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:11px}
+  .teamedit .lbl{font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:var(--mute);margin:12px 0 0}
+  .swrow{display:flex;gap:9px;margin-top:8px;flex-wrap:wrap}
+  .sw-opt{width:30px;height:30px;border-radius:8px;cursor:pointer;border:2px solid transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+  .sw-opt.on{border-color:#fff}
+  .toggle{width:44px;height:26px;border-radius:20px;background:#2c2c31;position:relative;transition:.15s;flex:none}
+  .toggle.on{background:var(--gold)}
+  .toggle .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.15s}
+  .toggle.on .knob{left:21px}
+
+  .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:#1c1c20;border:1px solid var(--line2);color:var(--ink);padding:10px 16px;border-radius:22px;font-size:13.5px;z-index:90;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <span class="brandlogo" id="brandlogo"></span>
+      <div><div class="brandtitle">MAN CAMP <b>STAFF</b></div><div class="brandsub" id="brandsub">PeeWee • 2026</div></div>
+      <button class="gear" id="gearBtn" onclick="openSettings()"></button>
+    </div>
+    <button class="viewas" id="viewas" onclick="toggleViewMenu(event)">
+      <span class="vicon" id="vicon"></span><span class="vtext" id="vtext"></span><span class="vchev" id="vchev"></span>
+    </button>
+    <div class="viewmenu" id="viewmenu"></div>
+  </div>
+
+  <div class="view" id="view"></div>
+</div>
+
+<div class="nav" id="nav"></div>
+<div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= CONFIG ================= */
+// TESTING: false = the "View as" switcher is clickable so you can preview every role.
+// PRODUCTION: set to true — each person signs in as one role and the switcher becomes a
+// fixed, non-clickable label. This is the only line that needs to change for go-live.
+const LOCK_ROLE = false;
+
+/* ================= DATA ================= */
+const RAW = `Michael	Aites	4-8	75	10	10	11	0	0	PW
+Jason	Avila	5-2	82	10	10	10	0	0	PW
+Alexander	Avila	5-2	82	10	10	12	0	0	PW
+Carter	Ballard	4-9	84	10	10	11	0	0	PW
+Isaac	Barber	4-9	88	10	10		0	0	PW
+Cohen	Barker	4-9	74	10	10	12	0	0	PW
+Titus	Botello	4-11	96	10	10	12	1	0	PW
+Andrew	Bridge	4-5	60	10	10	11	0	0	PW
+Myles	Brown	4-3	70	10	10	10	0	0	PW
+Mac	Brown	5-1	499	10	10	12	0	0	PW
+Chandler	Carlisle	4-11	150	10	10	10	0	0	PW
+Jackson	Cavanaugh	4-10	104	10	10	10	0	0	PW
+Lincoln	Cavanaugh	4-10	72	10	10	13	5	0	PW
+James	Cave	5-2	112	10	10	11	0	0	PW
+Matteson	Chambers	5-2	160	10	10	12	2	0	PW
+Logan	Childress	4-8	68	10	10	11	1	0	PW
+Dawson	Diehl	4-10	84	10	10	134	1	0	PW
+Wesson	Dover	5-0	118	10	10	10	0	0	PW
+Silas	Fletcher	5-0	80	10	10	12	0	0	PW
+Gohdric	Franqui	4-9	80	10	10	11	0	0	PW
+Colton	Gomez	4-11	88	10	10	12	0	0	PW
+Micah	Gordon	4-8	76	10	10	11	0	0	PW
+Ben	Griggs	5-1	85	10	10	10	2	0	PW
+Hunter	Hall	4-9	74	10	10	11	2	0	PW
+Jared	Hancock	4-9	83	10	10	11	1	0	PW
+Karter	Harty	4-10	113	10	10	12	0	0	PW
+Stephen	Hershberger	4-6	58	10	10	9	0	0	PW
+Ezekiel	Jarvis, Jr	5-9	292	1	0	12	0	0	PW
+Landon	Jenkins	4-10	105	10	10	13	2	0	PW
+Max	Kennedy	4-8	100	10	10	10	0	0	PW
+Dustin	Leighty	4-9	129	10	10	10	0	0	PW
+Leonardo	Linares	4-5	60	10	10	8	0	0	PW
+Angel	Linares Jr	4-8	78	10	10	11	1	0	PW
+Zayne	Lucco	4-9	81	10	10	11	1	0	PW
+David	Miller	4-7	74	10	10	10	0	0	PW
+Henry	Miller	4-11	72	10	10	12	1	0	PW
+Levi	Miller	1-4	96	10	10	13	4	0	PW
+Lincoln	Moncofsky	4-6	74	10	10	10	1	0	PW
+Jedidiah	Morrow	4-8	96	10	10	9	1	0	PW
+Titus	Napuunoa	5-1	94	10	10	12	0	0	PW
+Judah	Napuunoa	4-6	105	10	10	8	0	0	PW
+Nehemiah	Nettesheim	4-5	60	10	10	10	0	0	PW
+Marcus	Nolan	4-5	82	10	10	10	0	0	PW
+Judah	Ossewaarde	4-10	74	10	10	11	0	0	PW
+Jackson	Payne	4-3	57	10	10	11	2	0	PW
+Levi	Pigott		88	10	10	11	1	0	PW
+Levi	Prather	5-1	150	8	10	11	0	0	PW
+Karson	Rickner	4-7	88	10	10	12	0	0	PW
+James	Riley	4-6	82	10	10	11	0	0	PW
+Eli	Rios	4-10	110	10	10	12	1	0	PW
+Gabriel	Rivera	4-8	102	5	5	8	1	0	PW
+Samuel	Robideau	4-9	80	10	10	12	0	0	PW
+Danny	Rodgers	4-4	64	10	10	9	0	0	PW
+Joshua	Ruiz	4-11	88	10	10	14	2	0	PW
+Jaxon	Sells	4-10	95	10	5	11	0	0	PW
+Theodore	Sharpe	4-10	90	10	8	10	0	0	PW
+Andrew	Szwarga	4-7	74	10	10	11	1	0	PW
+Caleb	Szwarga	4-5	64	10	10	10	0	0	PW
+Harrison	Walker	4-10	85	10	10	11	2	0	PW
+Bryce	Walton	4-9	89	10	10	11	0	0	PW
+Joseph	Wood	5	112	10	10	11	0	0	PW
+Karion	Young	4-11	148	8	10	10	0	0	PW
+Karter	Young	4-11	102	10	10	11	1	0	PW
+Joseph	Young	4-10	79	10	10	12	1	0	PW
+Obadiah	Zerniak	4-7	77	10	10	10	2	0	PW
+Ezekiel	Zerniak	4-11	115	10	10	12	2	0	PW`;
+
+const FLAGS = {
+  "Mac Brown":"Weight 499 lbs looks like a typo",
+  "Dawson Diehl":"Age 134 looks like a typo",
+  "Levi Miller":"Height 1-4 looks like a typo",
+  "Joseph Wood":"Height listed as just \"5\"",
+  "Levi Pigott":"Height missing in source sheet",
+  "Colton Gomez":"Row was shifted in source; height set to 4-11 as best guess"
+};
+function heightInches(h){ if(!h) return null; const m=String(h).match(/^(\d+)\s*-\s*(\d+)$/); if(m) return +m[1]*12+ +m[2]; const n=parseInt(h); return isNaN(n)?null:n*12; }
+let _id=0;
+const PLAYERS = RAW.trim().split("\n").map(line=>{
+  const c=line.split("\t"); const first=c[0].trim(),last=c[1].trim(),name=first+" "+last;
+  const num=v=>{const n=parseInt(String(v).trim());return isNaN(n)?null:n;};
+  return { id:++_id,first,last,name,height:c[2].trim()||null,weight:num(c[3]),pushups:num(c[4]),situps:num(c[5]),
+    age:num(c[6]),campExp:num(c[7])||0,varsityExp:num(c[8])||0,level:c[9]?c[9].trim():"PW",
+    hIn:heightInches(c[2].trim()),flag:FLAGS[name]||null,drafted:false,teamId:null,pickNo:null };
+});
+// stable per-player number (draft-value rank by weight, desc)
+[...PLAYERS].sort((a,b)=>(b.weight||0)-(a.weight||0)).forEach((p,i)=>p.rank=i+1);
+
+/* ================= TEAMS ================= */
+const TEAMS = [
+  {id:1,name:"Blue Bulldogs",short:"Bulldogs",two:["Blue","Bulldogs"],coach:"Coach TBD",color:"#3f6fd6",initial:"B"},
+  {id:2,name:"Red Raptors",  short:"Raptors", two:["Red","Raptors"],  coach:"Coach TBD",color:"#cf4436",initial:"R"},
+  {id:3,name:"Green Gators", short:"Gators",  two:["Green","Gators"],  coach:"Coach TBD",color:"#2fa25a",initial:"G"},
+  {id:4,name:"Black Knights",short:"Knights", two:["Black","Knights"], coach:"Coach TBD",color:"#5b6270",initial:"K"}
+];
+const teamById=id=>TEAMS.find(t=>t.id===id);
+
+/* ================= DRAFT ORDER ================= */
+const ROUNDS=Math.ceil(PLAYERS.length/TEAMS.length);
+function buildOrder(seed){const o=[];for(let r=0;r<ROUNDS;r++){(r%2===0?seed:[...seed].reverse()).forEach(id=>o.push(id));}return o;}
+let ORDER=buildOrder(TEAMS.map(t=>t.id));
+
+/* ================= STATE ================= */
+const S={ role:"moderator", coachTeam:1, view:"board", seed:TEAMS.map(t=>t.id), seq:0,
+  queues:{}, notes:{}, tags:{}, tagVocab:["Fast","Strong","Heart","Tackle","Football IQ","Hands","Motor","Coachable","Leader"],
+  search:"", sort:"name", sortDir:"asc", rosterTeam:null, queueEdit:false, viewMenu:false,
+  divKey:"PW", setPage:null, locked:false, notif:{clock:true,start:true,pick:false}, _cr:false };
+TEAMS.forEach(t=>{S.queues[t.id]=[];});
+
+/* ================= ICONS ================= */
+const I={
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 12a7.4 7.4 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7.3 7.3 0 0 0-2-1.2l-.3-2.5H8.7l-.3 2.5a7.3 7.3 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5a7.4 7.4 0 0 0 0 2.4l-2 1.5 2 3.4 2.3-1a7.3 7.3 0 0 0 2 1.2l.3 2.5h4.6l.3-2.5a7.3 7.3 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.06-.4.1-.8.1-1.2Z"/></svg>',
+  person:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg>',
+  chevD:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  chevR:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>',
+  bolt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>',
+  undo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v5h5"/><path d="M3.5 12a8.5 8.5 0 1 1 2 6"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>',
+  filter:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>',
+  warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.2l8.6 15H3.4z"/><path d="M12 10v4"/><path d="M12 17.3h.01"/></svg>',
+  note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-11"/></svg>',
+  checkC:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  dots:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>',
+  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v7h14v-7"/></svg>',
+  nBoard:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 4v16M4 10h5M4 15h5"/></svg>',
+  nPlayers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3.3 2.8-5.6 5.5-5.6s5.5 2.3 5.5 5.6"/><path d="M16 5.6a3 3 0 0 1 0 5.8"/><path d="M17.5 14.7c2.2.5 3.8 2.2 3.8 5.3"/></svg>',
+  nQueue:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>',
+  nRosters:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>',
+  handle:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="7" r="1.4"/><circle cx="15" cy="7" r="1.4"/><circle cx="9" cy="12" r="1.4"/><circle cx="15" cy="12" r="1.4"/><circle cx="9" cy="17" r="1.4"/><circle cx="15" cy="17" r="1.4"/></svg>',
+  ban:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>',
+  sliders:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h8M18 7h2M4 12h2M12 12h8M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="12" r="2.2"/><circle cx="17" cy="17" r="2.2"/></svg>',
+  download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 11l4 4 4-4M5 20h14"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
+  doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg>',
+  question:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.8.4-1 .8-1 1.7"/><path d="M12 17h.01"/></svg>',
+  shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>'
+};
+function crest(teamId,cls){ const t=teamById(teamId); return `<span class="crest ${cls||''}"><svg viewBox="0 0 24 26">
+  <defs><linearGradient id="g${t.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${t.color}"/><stop offset="1" stop-color="${shade(t.color,-28)}"/></linearGradient></defs>
+  <path d="M12 1.4 21.4 4.5 V12 C21.4 17.7 17.1 21.9 12 24.2 C6.9 21.9 2.6 17.7 2.6 12 V4.5 Z" fill="url(#g${t.id})" stroke="rgba(255,255,255,.28)" stroke-width="0.7"/>
+  <path d="M12 1.4 21.4 4.5 V12 C21.4 17.7 17.1 21.9 12 24.2 C6.9 21.9 2.6 17.7 2.6 12 V4.5 Z" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="0.4" transform="scale(.86) translate(2,2.2)"/>
+  <text x="12" y="15.6" text-anchor="middle" font-family="Oswald,sans-serif" font-size="10.5" font-weight="700" fill="#fff">${t.initial}</text></svg></span>`; }
+function shade(hex,amt){ let c=hex.replace('#',''); let r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);
+  r=Math.max(0,Math.min(255,r+amt));g=Math.max(0,Math.min(255,g+amt));b=Math.max(0,Math.min(255,b+amt));
+  return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+const headerLogo=`<svg viewBox="0 0 24 26"><path d="M12 1.4 21.4 4.5 V12 C21.4 17.7 17.1 21.9 12 24.2 C6.9 21.9 2.6 17.7 2.6 12 V4.5 Z" fill="none" stroke="#d9a94a" stroke-width="1.3"/><path d="M8 12c1.4-1.7 6.6-1.7 8 0-1.4 1.7-6.6 1.7-8 0Z" fill="none" stroke="#d9a94a" stroke-width="1.2"/><path d="M10.4 12h3.2M12 10.8v2.4" stroke="#d9a94a" stroke-width="1"/></svg>`;
+
+/* ================= HELPERS ================= */
+const isCoach=()=>S.role==="head"||S.role==="assistant";
+const canQueue=()=>S.role==="head";
+const coachKey=()=>(S.role==="head"?"H":"A")+S.coachTeam;
+const noteBag=()=>S.notes[coachKey()]||(S.notes[coachKey()]={});
+const tagBag=()=>S.tags[coachKey()]||(S.tags[coachKey()]={});
+const noteOf=id=>isCoach()?((S.notes[coachKey()]||{})[id]||""):"";
+const tagsOf=id=>isCoach()?((S.tags[coachKey()]||{})[id]||[]):[];
+const DND="DO NOT DRAFT";
+const isDND=id=>tagsOf(id).includes(DND);
+const inTeamQueue=id=>isCoach()&&S.queues[S.coachTeam].includes(id);
+const picksMade=()=>PLAYERS.filter(p=>p.drafted).length;
+const onClockTeamId=()=>{const i=picksMade();return i<ORDER.length?ORDER[i]:null;};
+const draftDone=()=>picksMade()>=ORDER.length||PLAYERS.every(p=>p.drafted);
+function roundInfo(i){i=(i==null?picksMade():i);return{rd:Math.floor(i/TEAMS.length)+1,pir:i%TEAMS.length+1};}
+function fmtHt(h){return h?h.replace('-',"'")+'"':'—';}
+function metaLine(p){const yr=p.campExp>0?` • ${p.campExp} Camp Year${p.campExp>1?'s':''}`:'';return `${fmtHt(p.height)} • ${p.weight??'—'} lbs • Age ${p.age??'—'}${yr}`;}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+const $=id=>document.getElementById(id);
+
+/* ================= ACTIONS ================= */
+function assign(pid){ if(S.role!=="moderator")return toast("Only the moderator assigns picks");
+  if(S.locked)return toast("Draft is locked");
+  const tid=onClockTeamId(); if(tid==null)return toast("Draft complete");
+  const p=PLAYERS.find(x=>x.id===pid); if(!p||p.drafted)return;
+  p.drafted=true;p.teamId=tid;p.pickNo=++S.seq;
+  TEAMS.forEach(t=>{S.queues[t.id]=S.queues[t.id].filter(x=>x!==pid);});
+  toast(p.name+" → "+teamById(tid).name); render(); }
+function autoPick(){ const tid=onClockTeamId(); if(tid==null)return;
+  const q=S.queues[tid].filter(id=>!PLAYERS.find(p=>p.id===id).drafted); let pid=q[0];
+  if(!pid){const a=sortedAvailable();pid=a[0]&&a[0].id;} if(pid)assign(pid); }
+function reassignTeam(pid,tid){ if(S.role!=="moderator")return; const p=PLAYERS.find(x=>x.id===pid); if(!p||!p.drafted)return;
+  p.teamId=+tid; toast(p.name+" moved to "+teamById(+tid).name); render(); }
+function undoPick(pid){ if(S.role!=="moderator")return; const p=PLAYERS.find(x=>x.id===pid); if(!p||!p.drafted)return;
+  p.drafted=false;p.teamId=null;p.pickNo=null; toast(p.name+" returned to the pool"); render(); }
+function undoLast(){ const d=PLAYERS.filter(p=>p.drafted); if(!d.length)return; undoPick(d.sort((a,b)=>b.pickNo-a.pickNo)[0].id); }
+function moveSeed(tid,dir){ const i=S.seed.indexOf(tid),j=i+dir; if(j<0||j>=S.seed.length)return;
+  [S.seed[i],S.seed[j]]=[S.seed[j],S.seed[i]]; ORDER=buildOrder(S.seed); render(); openOrderEditor(); }
+function toggleQueue(pid){ if(!canQueue())return toast("Only the head coach can edit the queue");
+  const q=S.queues[S.coachTeam],i=q.indexOf(pid); if(i>=0){q.splice(i,1);toast("Removed from queue");}else{q.push(pid);toast("Added to queue");} render(); }
+function moveQueue(pid,dir){ if(!canQueue())return; const q=S.queues[S.coachTeam],i=q.indexOf(pid),j=i+dir; if(j<0||j>=q.length)return;
+  [q[i],q[j]]=[q[j],q[i]]; render(); }
+function clearQueue(){ if(!canQueue())return; S.queues[S.coachTeam]=[]; S.queueEdit=false; toast("Queue cleared"); render(); }
+function setNote(pid,text){ if(!isCoach())return; const b=noteBag(); if(text&&text.trim())b[pid]=text; else delete b[pid]; }
+function toggleTag(pid,tag){ if(!isCoach())return; const b=tagBag(),arr=b[pid]||(b[pid]=[]),i=arr.indexOf(tag);
+  if(i>=0)arr.splice(i,1); else arr.push(tag); if(arr.length===0)delete b[pid]; openPlayer(pid); }
+function addCustomTag(pid){ if(!isCoach())return; const el=$("customTag"); if(!el)return; const t=el.value.trim().replace(/["'<>]/g,""); if(!t)return;
+  let canon=S.tagVocab.find(v=>v.toLowerCase()===t.toLowerCase()); if(!canon){canon=t;S.tagVocab.push(canon);}
+  const b=tagBag(),arr=b[pid]||(b[pid]=[]); if(!arr.includes(canon))arr.push(canon); openPlayer(pid); }
+
+function sortedAvailable(){ let a=PLAYERS.filter(p=>!p.drafted);
+  if(S.search){const s=S.search.toLowerCase();a=a.filter(p=>p.name.toLowerCase().includes(s));}
+  const cmp={name:(x,y)=>x.last.localeCompare(y.last)||x.first.localeCompare(y.first),weight:(x,y)=>(x.weight||0)-(y.weight||0),
+    age:(x,y)=>(x.age||0)-(y.age||0),height:(x,y)=>(x.hIn||0)-(y.hIn||0),exp:(x,y)=>(x.campExp||0)-(y.campExp||0)};
+  a.sort(cmp[S.sort]||cmp.name); if(S.sortDir==="desc")a.reverse(); return a; }
+function setSort(k){ if(S.sort===k){S.sortDir=S.sortDir==="asc"?"desc":"asc";} else {S.sort=k;S.sortDir=(k==="name")?"asc":"desc";} render(); }
+
+/* ================= VIEW-AS ================= */
+function viewLabel(){ if(S.role==="moderator")return "View as Moderator";
+  return "View as "+(S.role==="head"?"Head Coach":"Assistant Coach")+" — "+teamById(S.coachTeam).name; }
+function viewColor(){ return S.role==="moderator"?"var(--gold)":teamById(S.coachTeam).color; }
+function toggleViewMenu(e){ if(LOCK_ROLE) return; if(e)e.stopPropagation(); S.viewMenu=!S.viewMenu; $("viewmenu").classList.toggle("open",S.viewMenu); }
+function setRoleTeam(role,team){ S.role=role; if(team)S.coachTeam=team; S.viewMenu=false;
+  if(!isCoach()&&S.view==="queue")S.view="board"; if(S.view==="rosters")S.rosterTeam=null; render(); }
+function renderViewMenu(){
+  let h=`<div class="vm-group"><div class="vm-item ${S.role==='moderator'?'sel':''}" onclick="setRoleTeam('moderator')"><span class="vicon" style="color:var(--gold)">${I.person}</span>Moderator ${S.role==='moderator'?`<span class="chk">${I.check}</span>`:''}</div></div>`;
+  h+=`<div class="vm-group"><div class="vm-lbl">Head Coach</div>`+TEAMS.map(t=>`<div class="vm-item ${S.role==='head'&&S.coachTeam===t.id?'sel':''}" onclick="setRoleTeam('head',${t.id})"><span class="sw" style="background:${t.color}"></span>${t.name} ${S.role==='head'&&S.coachTeam===t.id?`<span class="chk">${I.check}</span>`:''}</div>`).join("")+`</div>`;
+  h+=`<div class="vm-group"><div class="vm-lbl">Assistant Coach</div>`+TEAMS.map(t=>`<div class="vm-item ${S.role==='assistant'&&S.coachTeam===t.id?'sel':''}" onclick="setRoleTeam('assistant',${t.id})"><span class="sw" style="background:${t.color}"></span>${t.name} ${S.role==='assistant'&&S.coachTeam===t.id?`<span class="chk">${I.check}</span>`:''}</div>`).join("")+`</div>`;
+  $("viewmenu").innerHTML=h;
+}
+
+/* ================= RENDER ================= */
+function render(){
+  $("brandlogo").innerHTML=headerLogo; $("gearBtn").innerHTML=I.gear; $("brandsub").textContent=divName()+" • 2026";
+  $("vicon").innerHTML=`<span style="color:${viewColor()}">${I.person}</span>`;
+  $("vtext").textContent=viewLabel();
+  $("vchev").innerHTML=LOCK_ROLE?"":I.chevD;
+  $("viewas").classList.toggle("locked",LOCK_ROLE);
+  $("viewmenu").classList.toggle("open",S.viewMenu); renderViewMenu();
+  renderNav();
+  const v=S.view;
+  if(v==="board")renderBoard(); else if(v==="players")renderPlayers(); else if(v==="queue")renderQueue(); else if(v==="rosters")renderRosters();
+}
+function renderNav(){
+  const tabs=[["board","Board",I.nBoard],["players","Players",I.nPlayers],["queue","Queue",I.nQueue],["rosters","Rosters",I.nRosters]];
+  let qbadge=0; if(isCoach())qbadge=S.queues[S.coachTeam].filter(id=>!PLAYERS.find(p=>p.id===id).drafted).length;
+  $("nav").innerHTML=tabs.map(([k,lbl,ic])=>`<button class="${S.view===k?'on':''}" onclick="go('${k}')"><span class="ic">${ic}</span>${lbl}${k==='queue'&&qbadge?`<span class="bdg">${qbadge}</span>`:''}</button>`).join("");
+}
+function go(v){ S.view=v; if(v==="rosters")S.rosterTeam=null; if(v==="queue")S.queueEdit=false; render(); }
+
+/* ---- BOARD ---- */
+function renderBoard(){
+  const done=draftDone(), clockTid=onClockTeamId(), t=clockTid?teamById(clockTid):null, {rd,pir}=roundInfo();
+  let h="";
+  // banner
+  if(done){
+    h+=`<div class="banner"><div class="bcrest">${headerLogo}</div><div class="bmain"><div class="bmeta"><span class="gdot" style="background:var(--gold);animation:none;box-shadow:none"></span> DRAFT COMPLETE</div><div class="btitle">ALL ${picksMade()} CAMPERS PLACED</div></div></div>`;
+  }else{
+    h+=`<div class="banner"><div class="bcrest">${crest(clockTid)}</div><div class="bmain">
+      <div class="bmeta"><span class="gdot"></span> ROUND ${rd} • PICK ${pir} • ${picksMade()+1} OF ${PLAYERS.length}</div>
+      <div class="btitle">${t.name.toUpperCase()} ON THE CLOCK</div></div></div>`;
+    if(S.role==="moderator"&&picksMade()>0) h+=`<div class="bbtns"><button class="bbtn" onclick="undoLast()">${I.undo} Undo Last</button></div>`;
+  }
+  // recent picks
+  const picks=PLAYERS.filter(p=>p.drafted).sort((a,b)=>b.pickNo-a.pickNo).slice(0,4);
+  h+=`<div class="secrow"><h2 class="sec">Recent Picks</h2>${S.role==="moderator"?`<span class="link" onclick="openOrderEditor()">Edit Order</span>`:`<span class="link" onclick="go('rosters')">View All</span>`}</div>`;
+  if(!picks.length) h+=`<div class="empty">No picks yet — the board fills in live as the moderator assigns each camper.</div>`;
+  else h+=picks.map(p=>{const tm=teamById(p.teamId),ri=roundInfo(p.pickNo-1);
+    return `<div class="rpick"><span class="rp-rp">R${ri.rd} • P${ri.pir}</span>${crest(p.teamId)}<span class="rp-team">${tm.name}</span><span class="rp-num">#${p.pickNo}</span><span class="rp-name">${p.first[0]}. ${p.last}</span></div>`;}).join("");
+  // board grid
+  h+=`<div class="secrow"><h2 class="sec">Draft Board</h2><span class="rounds">Rounds ${I.chevD}</span></div>`;
+  const teamPicks={}; TEAMS.forEach(tm=>teamPicks[tm.id]=PLAYERS.filter(p=>p.teamId===tm.id).sort((a,b)=>a.pickNo-b.pickNo));
+  const clockRow=clockTid!=null?teamPicks[clockTid].length:-1;
+  h+=`<div class="board-wrap"><table class="board"><tr><th class="rd">RD</th>`+
+     TEAMS.map(tm=>`<th><div class="thteam">${crest(tm.id)}<span>${tm.two[0]}<br>${tm.two[1]}</span></div></th>`).join("")+`</tr>`;
+  for(let r=0;r<ROUNDS;r++){
+    h+=`<tr><td class="rd">${r+1}</td>`;
+    TEAMS.forEach(tm=>{
+      const seq=r%2===0?S.seed:[...S.seed].reverse(); const overall=r*TEAMS.length+seq.indexOf(tm.id)+1;
+      const p=teamPicks[tm.id][r]; const isClock=tm.id===clockTid&&r===clockRow&&!done;
+      if(p) h+=`<td class="filled" onclick="openPlayer(${p.id})"><div class="pknum">#${overall}</div><div class="pkname">${p.last}</div></td>`;
+      else if(isClock) h+=`<td class="empty clock"><div class="pknum">#${overall}</div><div class="oc">ON THE CLOCK</div></td>`;
+      else h+=`<td class="empty"><div class="pknum">#${overall}</div></td>`;
+    });
+    h+=`</tr>`;
+  }
+  h+=`</table></div><div class="hint">Snake order · ${TEAMS.length} teams · ${ROUNDS} rounds · scroll sideways to see all teams</div>`;
+  $("view").innerHTML=h;
+}
+function openOrderEditor(){ if(S.role!=="moderator")return;
+  const rows=S.seed.map((tid,i)=>{const t=teamById(tid);return `<div class="qrow"><span class="q-idx">${i+1}</span>${crest(tid)}<div class="q-body"><div class="q-name">${t.name}</div></div><div class="q-handle"><button onclick="moveSeed(${tid},-1)">▲</button><button onclick="moveSeed(${tid},1)">▼</button></div></div>`;}).join("");
+  $("sheet").innerHTML=`<div class="sh-top"><button class="ic" onclick="closeSheet()">${I.x}</button></div><div class="sh-body"><div class="dname" style="font-size:24px;margin-bottom:6px">DRAFT ORDER</div><div class="dsub" style="margin-bottom:16px">Round 1 order — the snake reverses each round. Picks already made stay put.</div>${rows}<div class="dactions" style="margin-top:14px"><button class="dbtn" onclick="closeSheet()">Done</button></div></div>`;
+  $("overlay").classList.add("show");
+}
+
+/* ---- PLAYERS ---- */
+function renderPlayers(){
+  const list=sortedAvailable();
+  const sorts=[["name","Name"],["weight","Weight"],["age","Age"],["height","Height"],["exp","Experience"]];
+  let h=`<div class="controls"><div class="search">${I.search}<input id="searchBox" placeholder="Search players…" value="${escapeHtml(S.search)}"></div><button class="filterbtn">${I.filter}</button></div>`;
+  h+=`<div class="chips">`+sorts.map(([k,l])=>`<button class="chip ${S.sort===k?'on':''}" onclick="setSort('${k}')">${l}${S.sort===k?` <span class="ar">${S.sortDir==='asc'?'↑':'↓'}</span>`:''}</button>`).join("")+`</div>`;
+  h+=list.map(p=>playerCard(p)).join("");
+  if(!list.length)h+=`<div class="empty">No campers match “${escapeHtml(S.search)}”.</div>`;
+  $("view").innerHTML=h;
+  const sb=$("searchBox"); sb.oninput=e=>{S.search=e.target.value;renderPlayers();}; sb.onfocus=()=>{const v=sb.value;sb.value="";sb.value=v;};
+}
+function playerCard(p){
+  const dnd=isDND(p.id), tags=tagsOf(p.id).filter(t=>t!==DND).slice(0,3), note=noteOf(p.id);
+  let action="";
+  if(S.role==="moderator"&&!draftDone()&&!S.locked) action=`<button class="qbtn draft" onclick="event.stopPropagation();assign(${p.id})">Draft</button>`;
+  else if(canQueue()){ action=inTeamQueue(p.id)?`<span class="qtag">${I.checkC} Queued</span>`:`<button class="qbtn" onclick="event.stopPropagation();toggleQueue(${p.id})">${I.plus} Queue</button>`; }
+  else if(S.role==="assistant"&&inTeamQueue(p.id)) action=`<span class="qtag">${I.checkC} Queued</span>`;
+  return `<div class="pcard ${dnd?'dnd':''}" onclick="openPlayer(${p.id})">
+    <div class="pbody">
+      <div class="prow1"><span class="pname">${p.name}</span>${dnd?`<span class="badge-dnd">${I.ban} Do Not Draft</span>`:''}${p.campExp>0?`<span class="badge-ret">Returning</span>`:''}${p.flag?`<span class="warn" title="${p.flag}">${I.warn}</span>`:''}</div>
+      <div class="pmeta">${metaLine(p)}</div>
+      ${(note||tags.length)?`<div class="pfoot">${note?`<span class="noteflag">${I.note}</span>`:''}${tags.map(t=>`<span class="ttag">${escapeHtml(t)}</span>`).join("")}</div>`:''}
+    </div>
+    <div class="paction">${action}</div></div>`;
+}
+
+/* ---- QUEUE ---- */
+function renderQueue(){
+  if(!isCoach()){ $("view").innerHTML=`<div class="empty">The queue is a coach tool. Switch to a coach view to build a team's draft queue.</div>`; return; }
+  const t=teamById(S.coachTeam), editable=canQueue(); const q=S.queues[S.coachTeam].map(id=>PLAYERS.find(p=>p.id===id));
+  const live=q.filter(p=>!p.drafted).length;
+  let h=`<div class="qhead"><div><h2>${editable?'MY QUEUE':'TEAM QUEUE'}</h2><div class="qsub">${live} Target${live!==1?'s':''}${editable?'':' · view only'}</div></div>${editable&&q.length?`<button class="qedit" onclick="S.queueEdit=!S.queueEdit;render()">${S.queueEdit?'Done':'Edit'}</button>`:''}</div>`;
+  if(S.queueEdit) h+=`<div class="qreorder">Reorder with the arrows · tap ✕ to remove</div>`;
+  if(!q.length){ h+=`<div class="empty">Queue is empty.${editable?" Go to Players and tap ＋ Queue on the boys you're targeting.":" Your head coach hasn't added anyone yet."}</div>`; }
+  else{
+    q.forEach((p,i)=>{
+      const gone=p.drafted;
+      h+=`<div class="qrow ${gone?'gone':''}"><span class="q-idx">${i+1}</span>${crest(p.teamId||S.coachTeam)}<div class="q-body" onclick="openPlayer(${p.id})"><div class="q-name ${isDND(p.id)?'dnd-name':''}">${p.name}</div><div class="q-meta">${fmtHt(p.height)} • ${p.weight??'—'} lb • ${p.age??'—'} yrs${gone?` · drafted by ${teamById(p.teamId).name}`:''}</div></div>`;
+      if(editable&&S.queueEdit&&!gone) h+=`<div class="q-handle"><button onclick="moveQueue(${p.id},-1)">▲</button><button onclick="moveQueue(${p.id},1)">▼</button></div><button class="q-x" onclick="toggleQueue(${p.id})">${I.x}</button>`;
+      else if(editable&&gone) h+=`<button class="q-x" onclick="toggleQueue(${p.id})">${I.x}</button>`;
+      else if(editable) h+=`<button class="q-dots" onclick="openPlayer(${p.id})">${I.dots}</button>`;
+      h+=`</div>`;
+    });
+    if(S.queueEdit) h+=`<button class="qclear" onclick="clearQueue()">Clear Queue</button>`;
+    else h+=`<div class="qfoot">Drafted players automatically remove from your queue.</div>`;
+  }
+  $("view").innerHTML=h;
+}
+
+/* ---- ROSTERS ---- */
+function renderRosters(){
+  let h=`<div class="rtabs"><button class="rtab ${S.rosterTeam==null?'on':''}" onclick="S.rosterTeam=null;render()">All Teams</button>`+
+    TEAMS.map(t=>`<button class="rtab ${S.rosterTeam===t.id?'on':''}" onclick="S.rosterTeam=${t.id};render()">${t.short}</button>`).join("")+`</div>`;
+  if(S.rosterTeam==null){
+    TEAMS.forEach(t=>{ const n=PLAYERS.filter(p=>p.teamId===t.id).length;
+      h+=`<div class="tcard" style="border-left-color:${t.color}" onclick="S.rosterTeam=${t.id};render()">${crest(t.id)}
+        <div><div class="tc-name">${t.name}</div><div class="tc-coach">Coach: ${t.coach}</div></div>
+        <div class="tc-right"><div class="tc-count">${n}<small>Players</small></div>${I.chevR}</div></div>`;
+    });
+  }else{
+    const t=teamById(S.rosterTeam); const roster=PLAYERS.filter(p=>p.teamId===t.id).sort((a,b)=>a.pickNo-b.pickNo);
+    h+=`<div class="rd-head">${crest(t.id)}<div><div class="rd-title">${t.name}</div><div class="rd-sub">${roster.length} Players · Coach: ${t.coach}</div></div></div>`;
+    if(!roster.length) h+=`<div class="empty">No players drafted to this team yet.</div>`;
+    else{
+      h+=`<div class="rtable"><div class="rt-h"><span class="rt-name">Player</span><span class="rt-ht">HT</span><span class="rt-wt">WT</span><span class="rt-age">AGE</span><span class="rt-chev"></span></div>`;
+      roster.forEach(p=>{ h+=`<div class="rt-r" onclick="openPlayer(${p.id})"><span class="rt-name ${isDND(p.id)?'dnd-name':''}">${p.name}</span><span class="rt-ht">${fmtHt(p.height)}</span><span class="rt-wt">${p.weight??'—'}</span><span class="rt-age">${p.age??'—'}</span><span class="rt-chev">${I.chevR}</span></div>`; });
+      h+=`</div>`;
+    }
+  }
+  $("view").innerHTML=h;
+}
+
+/* ---- PLAYER DETAIL ---- */
+function openPlayer(pid){
+  const p=PLAYERS.find(x=>x.id===pid);
+  const drafted=p.drafted, tm=drafted?teamById(p.teamId):null, dnd=isDND(p.id);
+  const badge=drafted?`<span class="dbadge dr">Drafted #${p.pickNo} · ${tm.name}</span>`:`<span class="dbadge av">Available</span>`;
+  // history
+  let hist=""; if(p.campExp>0){ for(let i=1;i<=p.campExp;i++){ hist+=`<div class="hist-row"><span class="hist-yr">${2026-i}</span><span class="hist-what">PeeWee Camper</span></div>`; } }
+  else hist=`<div class="hist-row"><span class="hist-yr">2026</span><span class="hist-what">First year at camp</span></div>`;
+  // coach tools
+  let coachTools="";
+  if(isCoach()){
+    const note=noteOf(p.id), mine=tagsOf(p.id);
+    const chips=S.tagVocab.map(tag=>`<span class="etag ${mine.includes(tag)?'on':''}" onclick="toggleTag(${p.id},'${tag.replace(/'/g,"\\'")}')">${escapeHtml(tag)}</span>`).join("");
+    coachTools=`<div class="dsec">Evaluation — your tags</div><div class="tagwrap">${chips}</div>
+      <div class="addtag"><input id="customTag" placeholder="Add a trait…" onkeydown="if(event.key==='Enter')addCustomTag(${p.id})"><button onclick="addCustomTag(${p.id})">Add</button></div>
+      <button class="dndbtn ${dnd?'on':''}" onclick="toggleTag(${p.id},'DO NOT DRAFT')">${I.ban} ${dnd?'Marked — Do Not Draft':'Do Not Draft'}</button>
+      <div class="dsec">Private notes</div><div class="notebox"><textarea class="note" placeholder="e.g. strong blocker, coachable, plays bigger than his size…" oninput="setNote(${p.id},this.value)">${escapeHtml(note)}</textarea></div>`;
+  }
+  // actions
+  let actions="";
+  if(S.role==="moderator"){
+    if(!drafted&&!draftDone()&&!S.locked) actions=`<div class="dactions"><button class="dbtn" onclick="assign(${p.id});closeSheet()">Draft to ${teamById(onClockTeamId()).name}</button></div>`;
+    else if(drafted) actions=`<div class="posrow"><label>Reassign to team — fix a wrong pick</label><select class="possel" onchange="reassignTeam(${p.id},this.value)">${TEAMS.map(t=>`<option value="${t.id}" ${t.id===p.teamId?'selected':''}>${t.name}</option>`).join("")}</select></div><div class="dactions"><button class="dbtn danger" onclick="undoPick(${p.id});closeSheet()">Return ${p.first} to Pool</button></div>`;
+  } else if(canQueue()&&!drafted){
+    const on=inTeamQueue(p.id);
+    actions=`<div class="dactions"><button class="dbtn ${on?'ghost':''}" onclick="toggleQueue(${p.id});closeSheet()">${on?'Remove from Queue':'Add to Queue'}</button></div>`;
+  }
+  $("sheet").innerHTML=`
+    <div class="sh-top"><button class="ic" onclick="closeSheet()">${I.back}</button></div>
+    <div class="sh-body">
+      <div class="dhead ${dnd?'dnd':''}"><div><div class="dname">${p.name}</div>${badge}${dnd?`<span class="dbadge dndb">${I.ban} Do Not Draft</span>`:''}<div class="dsub">${p.campExp} yr${p.campExp!==1?'s':''} camp · ${p.level==='PW'?'PeeWee':p.level} · ${p.age??'—'} yrs old</div></div>${crest(drafted?p.teamId:S.coachTeam)}</div>
+      ${p.flag?`<div class="warnrow">${I.warn}<span>${p.flag} — worth confirming in the source sheet.</span></div>`:''}
+      <div class="statgrid">
+        <div class="stat"><div class="v">${fmtHt(p.height)}</div><div class="k">Height</div></div>
+        <div class="stat"><div class="v">${p.weight??'—'}</div><div class="k">Weight (lb)</div></div>
+        <div class="stat"><div class="v">${p.age??'—'}</div><div class="k">Age</div></div>
+        <div class="stat"><div class="v">${p.pushups??'—'}</div><div class="k">Push-ups</div></div>
+        <div class="stat"><div class="v">${p.situps??'—'}</div><div class="k">Sit-ups</div></div>
+        <div class="stat"><div class="v">${p.campExp}</div><div class="k">Camp Yrs</div></div>
+      </div>
+      ${coachTools}
+      <div class="dsec">History</div><div class="hist">${hist}</div>
+      ${actions}
+    </div>`;
+  $("overlay").classList.add("show");
+}
+function closeSheet(){ $("overlay").classList.remove("show"); $("sheet").classList.remove("settings"); S.setPage=null; render(); }
+
+/* ================= DIVISIONS ================= */
+const DIVISIONS=[
+  {key:"PW",name:"PeeWee",band:"Ages 8–10"},
+  {key:"HB",name:"Headbuster",band:"Ages 11–12"},
+  {key:"KF",name:"Know Fear League",band:"Ages 13–14"},
+  {key:"JV",name:"Junior Varsity",band:"Ages 15–16"},
+  {key:"VAR",name:"Varsity",band:"Ages 17–18"}
+];
+const divName=()=>DIVISIONS.find(d=>d.key===S.divKey).name;
+const DIV_STATE={};
+const FN=["Aiden","Blake","Caleb","Dawson","Eli","Gabe","Hudson","Isaac","Jonah","Kade","Levi","Micah","Nathan","Owen","Parker","Reid","Silas","Titus","Wyatt","Josiah","Grant","Colton","Bennett","Emmett","Rhett","Tate","Brooks","Ryder","Zane","Cole"];
+const LN=["Adams","Boone","Carver","Dalton","Ellis","Foster","Grant","Hayes","Ingram","Jennings","Keller","Lawson","Mercer","Norris","Owens","Porter","Reeves","Sutton","Turner","Vance","Walsh","York","Bishop","Chandler","Dixon","Fowler","Hobbs","Landry","Mason","Pruitt"];
+function genDivisionPlayers(key){
+  const idx=DIVISIONS.findIndex(d=>d.key===key), base=idx*1000;
+  const ageBase={HB:11,KF:13,JV:15,VAR:17}[key]||11, wtBase={HB:112,KF:138,JV:162,VAR:182}[key]||112, ftBase={HB:4,KF:5,JV:5,VAR:5}[key]||4;
+  const out=[];
+  for(let i=0;i<48;i++){
+    const first=FN[(i*7+idx)%FN.length], last=LN[(i*5+idx*3+3)%LN.length];
+    const feet=ftBase+((i%5===0)?1:0), inch=(i*7)%12;
+    out.push({id:base+i+1,first,last,name:first+" "+last,height:feet+"-"+inch,weight:wtBase+((i*13)%70)-20,
+      pushups:8+((i*3)%22),situps:8+((i*4)%20),age:ageBase+((i*3)%3),campExp:(i%4===0)?((i%3)+1):0,
+      varsityExp:key==="VAR"?(i%2):0,level:key,hIn:feet*12+inch,flag:null,drafted:false,teamId:null,pickNo:null});
+  }
+  return out;
+}
+function recomputeRanks(){ [...PLAYERS].sort((a,b)=>(b.weight||0)-(a.weight||0)).forEach((p,i)=>p.rank=i+1); }
+function snapshotDivision(){ DIV_STATE[S.divKey]={players:PLAYERS.map(p=>({...p})),queues:JSON.parse(JSON.stringify(S.queues)),notes:JSON.parse(JSON.stringify(S.notes)),tags:JSON.parse(JSON.stringify(S.tags)),seed:[...S.seed],seq:S.seq,locked:S.locked}; }
+function loadDivision(key){
+  if(key===S.divKey){ setPage("main"); return; }
+  snapshotDivision(); S.divKey=key; const st=DIV_STATE[key];
+  const src=st?st.players:genDivisionPlayers(key);
+  PLAYERS.length=0; src.forEach(p=>PLAYERS.push(p)); recomputeRanks();
+  if(st){ S.queues=st.queues; S.notes=st.notes; S.tags=st.tags; S.seed=st.seed; S.seq=st.seq; S.locked=st.locked; }
+  else { S.queues={}; TEAMS.forEach(t=>S.queues[t.id]=[]); S.notes={}; S.tags={}; S.seed=TEAMS.map(t=>t.id); S.seq=0; S.locked=false; }
+  ORDER=buildOrder(S.seed); S.rosterTeam=null; S.view="board"; S.viewMenu=false; toast("Switched to "+divName()); closeSheet();
+}
+
+/* ================= SETTINGS ACTIONS ================= */
+const TEAM_COLORS=["#3f6fd6","#cf4436","#2fa25a","#5b6270","#d9a94a","#8e51d0","#e0862f","#2bb0b0"];
+function setTeamName(id,v){ const t=teamById(id); t.name=v||"Team"; const w=t.name.trim().split(/\s+/);
+  t.short=w[w.length-1]; t.two=w.length>1?[w.slice(0,-1).join(" "),w[w.length-1]]:[t.name," "]; t.initial=(t.name[0]||"?").toUpperCase(); }
+function setTeamColor(id,c){ teamById(id).color=c; renderSettings(); }
+function setTeamCoach(id,v){ teamById(id).coach=v||"Coach TBD"; }
+function toggleLock(){ S.locked=!S.locked; toast(S.locked?"Draft locked":"Draft unlocked"); renderSettings(); }
+function resetDraft(){ if(!S._cr){ S._cr=true; renderSettings(); setTimeout(()=>{S._cr=false;},4000); return; }
+  S._cr=false; PLAYERS.forEach(p=>{p.drafted=false;p.teamId=null;p.pickNo=null;}); S.seq=0; S.locked=false; toast("Draft reset"); setPage("main"); }
+function exportCSV(){
+  const rows=[["Division","Team","Pick","First","Last","Height","Weight","Age","Pushups","Situps","CampYears"]];
+  TEAMS.forEach(t=>{ PLAYERS.filter(p=>p.teamId===t.id).sort((a,b)=>a.pickNo-b.pickNo).forEach(p=>{
+    rows.push([divName(),t.name,p.pickNo,p.first,p.last,p.height||"",p.weight??"",p.age??"",p.pushups??"",p.situps??"",p.campExp]); }); });
+  if(rows.length===1) return toast("No picks to export yet");
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  const a=document.createElement("a"); a.href=url; a.download=`mancamp-${S.divKey}-rosters.csv`; a.click(); URL.revokeObjectURL(url); toast("Roster CSV exported");
+}
+function saveFix(id){ const p=PLAYERS.find(x=>x.id===id);
+  const h=$("fix-h-"+id),w=$("fix-w-"+id),a=$("fix-a-"+id);
+  if(h&&h.value.trim())p.height=h.value.trim(); if(w&&w.value.trim())p.weight=parseInt(w.value); if(a&&a.value.trim())p.age=parseInt(a.value);
+  p.hIn=heightInches(p.height); p.flag=null; recomputeRanks(); toast(p.name+" updated"); renderSettings(); }
+function toggleNotif(k){ S.notif[k]=!S.notif[k]; renderSettings(); }
+
+/* ================= SETTINGS CONTENT ================= */
+const CONTENT={
+ rules:`<h4>How the draft works</h4><ul>
+   <li>A neutral <b>moderator</b> runs the draft and makes every official pick. Coaches call out the boy they want; the moderator assigns him.</li>
+   <li>Teams pick in a <b>snake order</b> — the order reverses each round — and the draft continues until <b>every camper is placed</b>.</li>
+   <li>Only the <b>head coach</b> may build or reorder his team's queue. Assistant coaches can view it and keep their own notes and tags.</li>
+   <li>Notes and trait tags are <b>private to each coach</b> — nothing you write is visible to another team.</li>
+   <li>No trading of picks or players. If a camper is placed on the wrong team, only the <b>moderator</b> may correct it.</li>
+   <li>The moderator sets the order and may adjust it until the draft is <b>locked</b>. Once locked, results are final.</li></ul>
+ <h4>Fair play</h4><ul>
+   <li>Every boy who registers is drafted and gets to play — this is about development, not stacking a roster.</li>
+   <li>Coaches weigh effort, attitude, and character as much as size or skill.</li></ul>`,
+ policies:`<h4>Attendance &amp; safety</h4><ul>
+   <li>Campers check in each day and stay with their team and coaches at all times.</li>
+   <li>Cleats, mouthguard, and a water bottle are required for every session.</li>
+   <li>Hydration breaks are mandatory. Report any injury to a coach or the medical tent immediately.</li>
+   <li>Weather delays are called by camp staff — follow your coach's direction to shelter.</li></ul>
+ <h4>Conduct on campus</h4><ul>
+   <li>Phones stay put away during sessions and chapel.</li>
+   <li>Respect the facilities, First Baptist Church property, and all camp staff and volunteers.</li>
+   <li>Bullying, hazing, or foul language are not tolerated and may result in removal.</li></ul>
+ <h4>Parents &amp; pickup</h4><ul>
+   <li>Campers are released only to an authorized adult at the designated pickup area.</li>
+   <li>Questions about a team assignment go to the camp office, not the draft room.</li></ul>`,
+ conduct:`<p>Man Camp uses football as a tool to build young men of Christian character. Every camper and coach is expected to:</p><ul>
+   <li><b>Honor God</b> in word and action, on and off the field.</li>
+   <li><b>Respect</b> coaches, teammates, opponents, and officials — no arguing calls, no trash talk.</li>
+   <li><b>Encourage</b> one another and lift up the boy who is struggling.</li>
+   <li><b>Compete hard and clean</b> — full effort, within the rules, winning or losing with grace.</li>
+   <li><b>Own your mistakes</b> and accept correction; accepting criticism is a core camp value.</li>
+   <li><b>Serve</b> — leave the field, locker room, and camp better than you found them.</li></ul>
+   <p style="color:var(--mute)">"Let all that you do be done in love." — 1 Corinthians 16:14</p>`,
+ expect:`<p>Coaches set the tone for the whole camp. As a Man Camp coach you agree to:</p><ul>
+   <li>Put <b>character and development ahead of winning</b> — every boy plays and grows.</li>
+   <li>Model Christlike leadership: patient, encouraging, and firm.</li>
+   <li>Keep every camper <b>safe</b> — enforce hydration, proper technique, and injury reporting.</li>
+   <li>Be <b>fair and positive</b> in the draft and on the field; never publicly criticize a camper.</li>
+   <li>Communicate clearly with your assistant coaches and, when needed, with parents through the camp office.</li>
+   <li>Know and uphold the camp <b>code of conduct</b> and hold your team to it.</li></ul>`
+};
+
+/* ================= SETTINGS RENDER ================= */
+function openSettings(){ S.setPage="main"; renderSettings(); }
+function setPage(p){ S.setPage=p; renderSettings(); }
+function setRow(icon,label,val,onclick,cls){ return `<div class="set-row ${cls||''}" onclick="${onclick}"><span class="si">${icon}</span><span class="sl">${label}</span><span class="sv">${val||''} ${I.chevR}</span></div>`; }
+function settingsMain(){
+  if(S.role==="moderator"){
+    const flags=PLAYERS.filter(p=>p.flag).length;
+    return `<div class="set-sec">Draft · ${divName()}</div>
+      ${setRow(I.nRosters,"Division",divName(),"setPage('division')")}
+      ${setRow(I.gear,"Teams &amp; coaches","","setPage('teams')")}
+      ${setRow(I.sliders,"Draft controls",S.locked?"Locked":"","setPage('controls')")}
+      ${setRow(I.download,"Export rosters","","exportCSV()")}
+      ${setRow(I.warn,"Fix flagged data",flags?String(flags):"0","setPage('data')")}
+      <div class="set-sec">Account</div>
+      ${setRow(I.bell,"Notifications","","setPage('notif')")}
+      ${setRow(I.person,"Account","","setPage('account')")}
+      ${setRow(I.question,"About","","setPage('help')")}`;
+  }
+  return `<div class="set-sec">Camp Info</div>
+    ${setRow(I.nQueue,"Draft rules","","setPage('rules')")}
+    ${setRow(I.doc,"Camp policies","","setPage('policies')")}
+    ${setRow(I.shield,"Code of conduct","","setPage('conduct')")}
+    ${setRow(I.checkC,"Coaching expectations","","setPage('expect')")}
+    <div class="set-sec">My Account</div>
+    ${setRow(I.bell,"Notifications","","setPage('notif')")}
+    ${setRow(I.person,"Account","","setPage('account')")}
+    ${setRow(I.question,"About","","setPage('help')")}`;
+}
+function pageDivision(){
+  return `<div class="hint" style="margin:0 2px 12px">Switch which camp division you're drafting. Each has its own campers, teams, and board. PeeWee holds your real roster; the others are sample data for now.</div>`+
+    DIVISIONS.map(d=>`<div class="set-row" onclick="loadDivision('${d.key}')"><span class="si">${I.nRosters}</span><span class="sl">${d.name}<div class="ssub">${d.band}</div></span><span class="sv">${S.divKey===d.key?`<span style="color:var(--gold)">${I.check}</span>`:''} ${I.chevR}</span></div>`).join("");
+}
+function pageTeams(){
+  return `<div class="hint" style="margin:0 2px 12px">Edit team names, colors, and coach names. Logo uploads come in the full app.</div>`+
+    TEAMS.map(t=>`<div class="teamedit"><div style="display:flex;align-items:center;gap:10px">${crest(t.id)}<input class="set-in" style="margin:0" value="${escapeHtml(t.name)}" oninput="setTeamName(${t.id},this.value)"></div>
+      <div class="lbl">Color</div><div class="swrow">${TEAM_COLORS.map(c=>`<span class="sw-opt ${t.color.toLowerCase()===c.toLowerCase()?'on':''}" style="background:${c}" onclick="setTeamColor(${t.id},'${c}')"></span>`).join("")}</div>
+      <div class="lbl">Head coach</div><input class="set-in" value="${escapeHtml(t.coach)}" oninput="setTeamCoach(${t.id},this.value)">
+      <div class="lbl">Logo</div><button class="dbtn ghost" style="width:100%;margin-top:6px" onclick="toast('Logo upload is wired in the full app')">Upload logo</button></div>`).join("");
+}
+function pageControls(){
+  return `${setRow(I.nBoard,"Change draft order","","openOrderEditor()")}
+    <div class="set-row" onclick="toggleLock()"><span class="si">${I.ban}</span><span class="sl">${S.locked?'Unlock draft':'Lock / finish draft'}</span><span class="sv"><span class="toggle ${S.locked?'on':''}"><span class="knob"></span></span></span></div>
+    <div class="hint" style="margin:4px 2px 16px">Locking freezes the draft so no more picks or changes can be made.</div>
+    <div class="set-row danger" onclick="resetDraft()"><span class="si">${I.undo}</span><span class="sl">${S._cr?'Tap again to confirm reset':'Reset draft'}</span><span class="sv">${I.chevR}</span></div>`;
+}
+function pageData(){
+  const fl=PLAYERS.filter(p=>p.flag);
+  if(!fl.length) return `<div class="empty">No flagged data — all clean.</div>`;
+  return `<div class="hint" style="margin:0 2px 12px">These rows look like typos from the source sheet. Fix and save to clear the flag.</div>`+
+    fl.map(p=>`<div class="teamedit"><div style="font-family:'Oswald';font-weight:600;font-size:16px;text-transform:uppercase">${p.name}</div>
+      <div style="font-size:12px;color:var(--gold2);margin:4px 0 6px">${p.flag}</div>
+      <div style="display:flex;gap:8px"><div style="flex:1"><div class="lbl">Height</div><input class="set-in" id="fix-h-${p.id}" value="${p.height||''}"></div>
+      <div style="flex:1"><div class="lbl">Weight</div><input class="set-in" id="fix-w-${p.id}" value="${p.weight??''}"></div>
+      <div style="flex:1"><div class="lbl">Age</div><input class="set-in" id="fix-a-${p.id}" value="${p.age??''}"></div></div>
+      <button class="dbtn" style="width:100%;margin-top:12px" onclick="saveFix(${p.id})">Save</button></div>`).join("");
+}
+function pageNotif(){
+  const items=[["clock","Your team is on the clock"],["start","Draft has started"],["pick","A pick was made"]];
+  return `<div class="hint" style="margin:0 2px 12px">Choose when the app pings you during a live draft.</div>`+
+    items.map(([k,l])=>`<div class="set-row" onclick="toggleNotif('${k}')"><span class="sl">${l}</span><span class="sv"><span class="toggle ${S.notif[k]?'on':''}"><span class="knob"></span></span></span></div>`).join("");
+}
+function pageAccount(){
+  const who=S.role==="moderator"?"Moderator":(S.role==="head"?"Head Coach — "+teamById(S.coachTeam).name:"Assistant Coach — "+teamById(S.coachTeam).name);
+  return `<div class="teamedit"><div class="lbl">Signed in as</div><div style="font-family:'Oswald';font-weight:600;font-size:18px;margin-top:4px">${who}</div>
+    <div class="lbl" style="margin-top:12px">Division</div><div style="margin-top:4px">${divName()}</div></div>
+    <button class="dbtn danger" style="width:100%" onclick="toast('Sign-out is wired in the full app')">Sign out</button>
+    <div class="hint" style="margin-top:12px">In the live app your role is set by your login and can't be changed here.</div>`;
+}
+function pageHelp(){ return `<div class="set-content"><p><b>Man Camp Draft</b> — prototype v1.</p><p>A drafting tool for the Midwest Christian Boys Football Camp: run a live, fair draft, build rosters, and track players across every division.</p><p>Questions or issues? Contact the camp office.</p><p style="color:var(--mute)">© Man Camp · First Baptist Church, Dwight IL</p></div>`; }
+function renderSettings(){
+  const back=S.setPage==="main"?"closeSheet()":"setPage('main')";
+  const titles={main:"Settings",division:"Division",teams:"Teams & Coaches",controls:"Draft Controls",data:"Fix Flagged Data",notif:"Notifications",account:"Account",help:"About",rules:"Draft Rules",policies:"Camp Policies",conduct:"Code of Conduct",expect:"Coaching Expectations"};
+  const P=S.setPage; let body;
+  if(P==="main")body=settingsMain(); else if(P==="division")body=pageDivision(); else if(P==="teams")body=pageTeams();
+  else if(P==="controls")body=pageControls(); else if(P==="data")body=pageData(); else if(P==="notif")body=pageNotif();
+  else if(P==="account")body=pageAccount(); else if(P==="help")body=pageHelp(); else body=`<div class="set-content">${CONTENT[P]||""}</div>`;
+  $("sheet").innerHTML=`<div class="sh-top"><button class="ic" onclick="${back}">${I.back}</button></div>
+    <div class="set-page"><div class="set-head"><div class="ttl">${titles[P]||"Settings"}</div></div>${body}</div>`;
+  $("sheet").classList.add("settings"); $("overlay").classList.add("show");
+}
+
+/* ================= MISC ================= */
+let toastT; function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),1400);}
+$("overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeSheet();});
+document.addEventListener("click",e=>{ if(S.viewMenu && !e.target.closest("#viewmenu") && !e.target.closest("#viewas")){ S.viewMenu=false; $("viewmenu").classList.remove("open"); }});
+render();
+</script>
+</body>
+</html>
