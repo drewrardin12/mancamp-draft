@@ -768,13 +768,8 @@ function renderPlayerList(){
   el.innerHTML = list.length ? list.map(p=>playerCard(p)).join("") : `<div class="empty">No campers match “${escapeHtml(S.search)}”.</div>`;
 }
 function renderPlayers(){
-  const has40=PLAYERS.some(p=>p.forty);
-  if(S.sort==="forty"&&!has40) S.sort="name";
-  const sorts=[["name","Name"],["age","Age"],["height","Height"],["weight","Weight"]];
-  if(has40) sorts.push(["forty","40 Time"]);
-  sorts.push(["exp","Experience"]);
+  S.sort="name"; S.sortDir="asc";   // pool is a simple A–Z list now — all sorting lives on the Stats tab
   let h=`<div class="controls"><div class="search">${I.search}<input id="searchBox" placeholder="Search players…" value="${escapeHtml(S.search)}"></div></div>`;
-  h+=`<div class="chips">`+sorts.map(([k,l])=>`<button class="chip ${S.sort===k?'on':''}" onclick="setSort('${k}')">${l}${S.sort===k?` <span class="ar">${S.sortDir==='asc'?'↑':'↓'}</span>`:''}</button>`).join("")+`</div>`;
   h+=`<div id="plist"></div>`;
   $("view").innerHTML=h;
   renderPlayerList();
