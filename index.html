@@ -320,6 +320,35 @@
 
   .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:#1c1c20;border:1px solid var(--line2);color:var(--ink);padding:10px 16px;border-radius:22px;font-size:13.5px;z-index:90;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
   .toast.show{opacity:1}
+  /* ---------- Stats table ---------- */
+  .statwrap{max-height:none}
+  table.stattbl{font-size:11.5px}
+  table.stattbl th,table.stattbl td{white-space:nowrap;min-width:52px}
+  table.stattbl th{cursor:pointer;user-select:none;text-align:right}
+  table.stattbl th.stname{text-align:left}
+  table.stattbl th .ar{color:var(--gold);font-size:10px;margin-left:2px}
+  table.stattbl th.sorton{color:var(--gold2)}
+  table.stattbl td.stnum{text-align:right;color:var(--mute);font-variant-numeric:tabular-nums}
+  table.stattbl th.stnum{text-align:right}
+  table.stattbl td.sorton{color:var(--ink);background:rgba(217,169,74,.07)}
+  table.stattbl th.sorton.stnum{background:rgba(217,169,74,.10)}
+  table.stattbl th.stname,table.stattbl td.stname{position:sticky;left:0;z-index:3;min-width:158px;max-width:172px}
+  table.stattbl td.stname{background:var(--card)}
+  table.stattbl th.stname{z-index:5;background:#1c1c20}
+  table.stattbl tr{cursor:pointer}
+  table.stattbl td.stname .strk{color:var(--dim);font-family:'Oswald',sans-serif;font-weight:700;font-size:11px;margin-right:8px}
+  table.stattbl td.stname .stpn{font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.2px;text-transform:uppercase;font-size:12.5px}
+  table.stattbl td.stname .stdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:7px;vertical-align:middle}
+  table.stattbl td.stname .stwarn{color:var(--red);margin-left:5px}
+  table.stattbl td.stname .stwarn svg{width:12px;height:12px;display:inline-block;vertical-align:middle}
+  /* ---------- Draft confirm ---------- */
+  .sh-body.confirm{text-align:center;padding:10px 24px 30px}
+  .cf-crest{display:flex;justify-content:center;margin:8px 0 16px}
+  .cf-crest svg{width:56px;height:60px}
+  .cf-q{font-family:'Oswald',sans-serif;font-weight:600;font-size:21px;line-height:1.3;text-transform:uppercase;letter-spacing:.3px;margin-bottom:10px}
+  .cf-q b{color:var(--gold2)}
+  .cf-sub{font-size:13px;color:var(--mute);margin-bottom:24px}
+  .sh-body.confirm .dactions{margin-top:0}
 </style>
 </head>
 <body>
@@ -457,6 +486,7 @@ let ORDER=buildOrder(TEAMS.map(t=>t.id));
 const S={ role:"moderator", coachTeam:1, view:"board", seed:TEAMS.map(t=>t.id), seq:0,
   queues:{}, notes:{}, tags:{}, tagVocab:["Fast","Strong","Heart","Tackle","Football IQ","Hands","Motor","Coachable","Leader"],
   search:"", sort:"name", sortDir:"asc", rosterTeam:null, queueEdit:false, viewMenu:false,
+  statCat:"measure", statSort:"weight", statDir:"desc", statSearch:"", draftDelegate:{},
   divKey:"PW", setPage:null, locked:false, notif:{clock:true,start:true,pick:false}, _cr:false };
 TEAMS.forEach(t=>{S.queues[t.id]=[];});
 
@@ -483,6 +513,7 @@ const I={
   nPlayers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3.3 2.8-5.6 5.5-5.6s5.5 2.3 5.5 5.6"/><path d="M16 5.6a3 3 0 0 1 0 5.8"/><path d="M17.5 14.7c2.2.5 3.8 2.2 3.8 5.3"/></svg>',
   nQueue:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>',
   nRosters:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>',
+  nStats:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><rect x="5" y="11" width="3.4" height="7"/><rect x="10.3" y="6" width="3.4" height="12"/><rect x="15.6" y="9" width="3.4" height="9"/></svg>',
   handle:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="7" r="1.4"/><circle cx="15" cy="7" r="1.4"/><circle cx="9" cy="12" r="1.4"/><circle cx="15" cy="12" r="1.4"/><circle cx="9" cy="17" r="1.4"/><circle cx="15" cy="17" r="1.4"/></svg>',
   ban:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>',
   sliders:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h8M18 7h2M4 12h2M12 12h8M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="12" r="2.2"/><circle cx="17" cy="17" r="2.2"/></svg>',
@@ -523,6 +554,12 @@ const inTeamQueue=id=>isCoach()&&S.queues[S.coachTeam].includes(id);
 const picksMade=()=>PLAYERS.filter(p=>p.drafted).length;
 const onClockTeamId=()=>{const i=picksMade();return i<ORDER.length?ORDER[i]:null;};
 const draftDone=()=>picksMade()>=ORDER.length||PLAYERS.every(p=>p.drafted);
+// Who may draft right now: the head coach of the team on the clock, or an assistant that head coach has delegated to.
+function onClockDrafter(){ const tid=onClockTeamId(); if(tid==null||S.locked||draftDone()) return false;
+  if(S.role==="moderator") return true;                                    // moderator can draft for whichever team is on the clock
+  if(S.role==="head"&&S.coachTeam===tid) return true;
+  if(S.role==="assistant"&&S.coachTeam===tid&&S.draftDelegate[tid]) return true;
+  return false; }
 function roundInfo(i){i=(i==null?picksMade():i);return{rd:Math.floor(i/TEAMS.length)+1,pir:i%TEAMS.length+1};}
 function fmtHt(h){return h?h.replace('-',"'")+'"':'—';}
 function metaLine(p){return `${fmtHt(p.height)} • ${p.weight??'—'} lbs • Age ${p.age??'—'}`;}
@@ -545,8 +582,41 @@ function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":
 const $=id=>document.getElementById(id);
 
 /* ================= ACTIONS ================= */
-function assign(pid){ if(S.role!=="moderator")return toast("Only the moderator assigns picks");
-  if(S.locked)return toast("Draft is locked");
+// Step 1 of the two-tap draft: a coach picks a player, we ask them to confirm.
+function confirmDraft(pid){ const p=PLAYERS.find(x=>x.id===pid); if(!p||p.drafted) return;
+  if(!onClockDrafter()) return toast("Only the team on the clock can draft");
+  const tid=onClockTeamId(), tm=teamById(tid);
+  $("sheet").classList.remove("settings");
+  $("sheet").innerHTML=`<div class="sh-top"><button class="ic" onclick="closeSheet()">${I.x}</button></div>
+    <div class="sh-body confirm">
+      <div class="cf-crest">${crest(tid)}</div>
+      <div class="cf-q">Draft <b>${escapeHtml(p.name)}</b><br>to the ${escapeHtml(tm.name)}?</div>
+      <div class="cf-sub">${fmtHt(p.height)} • ${p.weight??'—'} lb • Age ${p.age??'—'}</div>
+      <div class="dactions">
+        <button class="dbtn ghost" onclick="closeSheet()">Cancel</button>
+        <button class="dbtn" onclick="doDraft(${pid})">Confirm Pick</button>
+      </div>
+    </div>`;
+  showSheet(); }
+function doDraft(pid){ assign(pid); closeSheet(); }
+// Generic "are you sure?" modal, reused for undo / return-to-pool so nothing reverses by accident.
+let _pendingConfirm=null;
+function askConfirm(o){ _pendingConfirm=o.run||null; $("sheet").classList.remove("settings");
+  $("sheet").innerHTML=`<div class="sh-top"><button class="ic" onclick="closeSheet()">${I.x}</button></div>
+    <div class="sh-body confirm">${o.crest?`<div class="cf-crest">${o.crest}</div>`:''}
+      <div class="cf-q">${o.title}</div>${o.sub?`<div class="cf-sub">${o.sub}</div>`:''}
+      <div class="dactions"><button class="dbtn ghost" onclick="closeSheet()">Cancel</button>
+        <button class="dbtn"${o.danger?' style="background:var(--red);border-color:var(--red);color:#fff"':''} onclick="runConfirm()">${o.confirmLabel||'Confirm'}</button></div>
+    </div>`; showSheet(); }
+function runConfirm(){ const fn=_pendingConfirm; _pendingConfirm=null; closeSheet(); if(fn)fn(); }
+function confirmUndoLast(){ const d=PLAYERS.filter(p=>p.drafted); if(!d.length)return toast("No picks to undo");
+  const p=d.sort((a,b)=>b.pickNo-a.pickNo)[0];
+  askConfirm({crest:crest(p.teamId),title:"Undo the last pick?",sub:`${escapeHtml(p.name)} — pick #${p.pickNo}, ${escapeHtml(teamById(p.teamId).name)} — goes back to the pool.`,confirmLabel:"Undo Pick",danger:true,run:()=>undoLast()}); }
+function confirmReturnPool(pid){ const p=PLAYERS.find(x=>x.id===pid); if(!p||!p.drafted)return;
+  askConfirm({crest:crest(p.teamId),title:`Return ${escapeHtml(p.first)} to the pool?`,sub:`${escapeHtml(p.name)} will be removed from ${escapeHtml(teamById(p.teamId).name)} and become available again.`,confirmLabel:"Return to Pool",danger:true,run:()=>undoPick(pid)}); }
+// Step 2: commit the pick for the team on the clock.
+function assign(pid){ if(S.locked)return toast("Draft is locked");
+  if(!onClockDrafter())return toast("Only the team on the clock can draft");
   const tid=onClockTeamId(); if(tid==null)return toast("Draft complete");
   const p=PLAYERS.find(x=>x.id===pid); if(!p||p.drafted)return;
   p.drafted=true;p.teamId=tid;p.pickNo=++S.seq;
@@ -606,7 +676,7 @@ function render(){
   $("viewmenu").classList.toggle("open",S.viewMenu); renderViewMenu();
   renderNav();
   const v=S.view;
-  if(v==="board")renderBoard(); else if(v==="players")renderPlayers(); else if(v==="queue")renderQueue(); else if(v==="rosters")renderRosters();
+  if(v==="board")renderBoard(); else if(v==="players")renderPlayers(); else if(v==="stats")renderStats(); else if(v==="queue")renderQueue(); else if(v==="rosters")renderRosters();
   const sig=v+"|"+S.divKey+"|"+S.rosterTeam;   // fade only when the view/division/roster level actually changes
   if(sig!==_viewSig) animateIn($("view"));
   _viewSig=sig;
@@ -614,9 +684,9 @@ function render(){
 let _viewSig=null;
 function animateIn(el){ if(!el)return; el.classList.remove("anim-in"); void el.offsetWidth; el.classList.add("anim-in"); }
 function renderNav(){
-  const tabs=[["board","Board",I.nBoard],["players","Players",I.nPlayers],["queue","Queue",I.nQueue],["rosters","Rosters",I.nRosters]];
-  let qbadge=0; if(isCoach())qbadge=S.queues[S.coachTeam].filter(id=>!PLAYERS.find(p=>p.id===id).drafted).length;
-  $("nav").innerHTML=tabs.map(([k,lbl,ic])=>`<button class="${S.view===k?'on':''}" onclick="go('${k}')"><span class="ic">${ic}</span>${lbl}${k==='queue'&&qbadge?`<span class="bdg">${qbadge}</span>`:''}</button>`).join("");
+  // Queue is no longer a bottom-nav tab — coaches reach it from a button on the Board.
+  const tabs=[["board","Board",I.nBoard],["players","Players",I.nPlayers],["stats","Stats",I.nStats],["rosters","Rosters",I.nRosters]];
+  $("nav").innerHTML=tabs.map(([k,lbl,ic])=>`<button class="${S.view===k?'on':''}" onclick="go('${k}')"><span class="ic">${ic}</span>${lbl}</button>`).join("");
 }
 function go(v){ S.view=v; if(v==="rosters")S.rosterTeam=null; if(v==="queue")S.queueEdit=false; render(); }
 
@@ -631,7 +701,18 @@ function renderBoard(){
     h+=`<div class="banner"><div class="bcrest">${crest(clockTid)}</div><div class="bmain">
       <div class="bmeta"><span class="gdot"></span> ROUND ${rd} • PICK ${pir} • ${picksMade()+1} OF ${PLAYERS.length}</div>
       <div class="btitle">${t.name.toUpperCase()} ON THE CLOCK</div></div></div>`;
-    if(S.role==="moderator"&&picksMade()>0) h+=`<div class="bbtns"><button class="bbtn" onclick="undoLast()">${I.undo} Undo Last</button></div>`;
+    if(S.role==="moderator"){
+      let mb="";
+      if(onClockDrafter()) mb+=`<button class="bbtn" style="background:var(--gold);color:#111" onclick="go('players')">${I.bolt} Draft a Player</button>`;
+      if(picksMade()>0) mb+=`<button class="bbtn" onclick="confirmUndoLast()">${I.undo} Undo Last</button>`;
+      if(mb) h+=`<div class="bbtns">${mb}</div>`;
+    }
+  }
+  // coach queue access + on-the-clock cue — live on the Board instead of a nav tab
+  if(isCoach()){
+    if(onClockDrafter()) h+=`<div class="bbtns"><button class="bbtn" style="background:var(--gold);color:#111" onclick="go('players')">${I.bolt} You're On The Clock — Draft</button></div>`;
+    const live=S.queues[S.coachTeam].filter(id=>!PLAYERS.find(p=>p.id===id).drafted).length;
+    h+=`<div class="bbtns"><button class="bbtn" onclick="go('queue')">${I.nQueue} ${canQueue()?'My Queue':'Team Queue'}${live?` · ${live} Target${live!==1?'s':''}`:''}</button></div>`;
   }
   // recent picks
   const picks=PLAYERS.filter(p=>p.drafted).sort((a,b)=>b.pickNo-a.pickNo).slice(0,4);
@@ -688,7 +769,7 @@ function renderPlayers(){
 function playerCard(p){
   const dnd=isDND(p.id), gp=isGP(p.id), tags=tagsOf(p.id).filter(t=>t!==DND&&t!==GP).slice(0,3), note=noteOf(p.id);
   let action="";
-  if(S.role==="moderator"&&!draftDone()&&!S.locked) action=`<button class="qbtn draft" onclick="event.stopPropagation();assign(${p.id})">Draft</button>`;
+  if(onClockDrafter()) action=`<button class="qbtn draft" onclick="event.stopPropagation();confirmDraft(${p.id})">Draft</button>`;
   else if(canQueue()){ action=inTeamQueue(p.id)?`<span class="qtag">${I.checkC} Queued</span>`:`<button class="qbtn" onclick="event.stopPropagation();toggleQueue(${p.id})">${I.plus} Queue</button>`; }
   else if(S.role==="assistant"&&inTeamQueue(p.id)) action=`<span class="qtag">${I.checkC} Queued</span>`;
   return `<div class="pcard ${dnd?'dnd':''}${gp?' gp':''}" onclick="openPlayer(${p.id})">
@@ -705,7 +786,8 @@ function renderQueue(){
   if(!isCoach()){ $("view").innerHTML=`<div class="empty">The queue is a coach tool. Switch to a coach view to build a team's draft queue.</div>`; return; }
   const t=teamById(S.coachTeam), editable=canQueue(); const q=S.queues[S.coachTeam].map(id=>PLAYERS.find(p=>p.id===id));
   const live=q.filter(p=>!p.drafted).length;
-  let h=`<div class="qhead"><div><h2>${editable?'MY QUEUE':'TEAM QUEUE'}</h2><div class="qsub">${live} Target${live!==1?'s':''}${editable?'':' · view only'}</div></div>${editable&&q.length?`<button class="qedit" onclick="S.queueEdit=!S.queueEdit;render()">${S.queueEdit?'Done':'Edit'}</button>`:''}</div>`;
+  let h=`<div class="link" style="margin:2px 2px 12px;display:inline-flex;align-items:center;gap:4px" onclick="go('board')"><span style="display:inline-flex;width:14px">${I.back}</span>Board</div>`;
+  h+=`<div class="qhead"><div><h2>${editable?'MY QUEUE':'TEAM QUEUE'}</h2><div class="qsub">${live} Target${live!==1?'s':''}${editable?'':' · view only'}</div></div>${editable&&q.length?`<button class="qedit" onclick="S.queueEdit=!S.queueEdit;render()">${S.queueEdit?'Done':'Edit'}</button>`:''}</div>`;
   if(S.queueEdit) h+=`<div class="qreorder">Reorder with the arrows · tap ✕ to remove</div>`;
   if(!q.length){ h+=`<div class="empty">Queue is empty.${editable?" Go to Players and tap ＋ Queue on the boys you're targeting.":" Your head coach hasn't added anyone yet."}</div>`; }
   else{
@@ -746,6 +828,94 @@ function renderRosters(){
   $("view").innerHTML=h;
 }
 
+/* ---- STATS ---- */
+// Column groups. get() returns a number or null/undefined (missing → sorts last, shows "—").
+function statCats(){
+  const hasForty=PLAYERS.some(p=>p.forty!=null);
+  const hasStats=PLAYERS.some(p=>p.stats);
+  const hasVarsity=PLAYERS.some(p=>p.varsityExp>0);
+  const g=k=>(p=>p.stats?p.stats[k]:null);   // pull a season stat off p.stats
+  const mcols=[
+    {key:"age",lbl:"AGE",get:p=>p.age},
+    {key:"hIn",lbl:"HT",get:p=>p.hIn,disp:p=>fmtHt(p.height)},
+    {key:"weight",lbl:"WT",get:p=>p.weight}
+  ];
+  if(hasForty) mcols.push({key:"forty",lbl:"40",asc:true,get:p=>p.forty,disp:p=>p.forty!=null?p.forty.toFixed(2):null});
+  mcols.push({key:"pushups",lbl:"PU",get:p=>p.pushups},{key:"situps",lbl:"SU",get:p=>p.situps},{key:"campExp",lbl:"CAMP",get:p=>p.campExp});
+  if(hasVarsity) mcols.push({key:"varsityExp",lbl:"VAR",get:p=>p.varsityExp});
+  const cats=[{key:"measure",lbl:"Measurables",def:"weight",cols:mcols}];
+  if(hasStats){
+    cats.push({key:"rush",lbl:"Rushing",def:"rush_yds",cols:[
+      {key:"rush_att",lbl:"ATT",get:g("rush_att")},{key:"rush_yds",lbl:"YDS",get:g("rush_yds")},{key:"rush_td",lbl:"TD",get:g("rush_td")}]});
+    cats.push({key:"rec",lbl:"Receiving",def:"rec_yds",cols:[
+      {key:"rec_rec",lbl:"REC",get:g("rec_rec")},{key:"rec_yds",lbl:"YDS",get:g("rec_yds")},{key:"rec_td",lbl:"TD",get:g("rec_td")}]});
+    cats.push({key:"pass",lbl:"Passing",def:"pass_yds",cols:[
+      {key:"pass_comp",lbl:"COMP",get:g("pass_comp")},{key:"pass_att",lbl:"ATT",get:g("pass_att")},{key:"pass_yds",lbl:"YDS",get:g("pass_yds")},
+      {key:"pass_td",lbl:"TD",get:g("pass_td")},{key:"pass_int",lbl:"INT",get:g("pass_int")}]});
+    cats.push({key:"def",lbl:"Defense",def:"def_tkl",cols:[
+      {key:"def_tkl",lbl:"TKL",get:g("def_tkl")},{key:"def_sack",lbl:"SACK",get:g("def_sack")},{key:"def_int",lbl:"INT",get:g("def_int")}]});
+  }
+  return cats;
+}
+function isBlank(v){ return v==null||v===false||(typeof v==="number"&&isNaN(v)); }
+function statCell(p,col){
+  if(col.disp){ const d=col.disp(p); return isBlank(d)?'—':d; }
+  const v=col.get(p); return isBlank(v)?'—':v;
+}
+function statsList(cat){
+  let a=PLAYERS.slice();
+  if(S.statSearch){ const s=S.statSearch.toLowerCase(); a=a.filter(p=>p.name.toLowerCase().includes(s)); }
+  const isStatCat=cat.key!=="measure";                 // measurables: everyone has them, so no grouping
+  const hasCat=p=>cat.cols.some(c=>!isBlank(c.get(p))); // does this camper have ANY stat in this category?
+  const byName=(x,y)=>x.last.localeCompare(y.last)||x.first.localeCompare(y.first);
+  const col=S.statSort==="name"?null:cat.cols.find(c=>c.key===S.statSort);
+  const get=col?col.get:null;
+  a.sort((x,y)=>{
+    if(isStatCat){ const hx=hasCat(x),hy=hasCat(y); if(hx!==hy) return hx?-1:1; }  // no-stat campers always at the bottom, any sort
+    if(!get) return S.statDir==="asc"?byName(x,y):-byName(x,y);                     // sorting by player name
+    const xv=get(x),yv=get(y), xn=isBlank(xv),yn=isBlank(yv);
+    if(xn&&yn) return byName(x,y);
+    if(xn) return 1; if(yn) return -1;                 // blank in the sorted column → below numbers in the same group
+    if(xv===yv) return byName(x,y);
+    return S.statDir==="asc"?(xv-yv):(yv-xv);
+  });
+  return a;
+}
+function setStatCat(k){ const c=statCats().find(x=>x.key===k)||statCats()[0]; S.statCat=c.key; S.statSort=c.def; S.statDir=(c.def==="forty")?"asc":"desc"; renderStats(); }
+function setStatSort(k){ if(S.statSort===k){ S.statDir=S.statDir==="asc"?"desc":"asc"; }
+  else { S.statSort=k; S.statDir=(k==="name"||k==="forty")?"asc":"desc"; } renderStatsTable(); }
+function renderStats(){
+  const cats=statCats();
+  if(!cats.find(c=>c.key===S.statCat)) S.statCat=cats[0].key;
+  let h=`<div class="controls"><div class="search">${I.search}<input id="statSearch" placeholder="Search players…" value="${escapeHtml(S.statSearch)}"></div></div>`;
+  if(cats.length>1) h+=`<div class="chips">`+cats.map(c=>`<button class="chip ${S.statCat===c.key?'on':''}" onclick="setStatCat('${c.key}')">${c.lbl}</button>`).join("")+`</div>`;
+  h+=`<div id="stbl"></div>`;
+  $("view").innerHTML=h;
+  renderStatsTable();
+  const sb=$("statSearch"); if(sb) sb.oninput=e=>{ S.statSearch=e.target.value; renderStatsTable(); };  // keep the input focused
+}
+function renderStatsTable(){
+  const el=$("stbl"); if(!el) return;
+  const cats=statCats(); const cat=cats.find(c=>c.key===S.statCat)||cats[0];
+  if(S.statSort!=="name" && !cat.cols.find(c=>c.key===S.statSort)){ S.statSort=cat.def; S.statDir="desc"; }
+  const cols=cat.cols, list=statsList(cat);
+  const arrow=`<span class="ar">${S.statDir==='asc'?'↑':'↓'}</span>`;
+  const prev=el.querySelector('.board-wrap'); const sl=prev?prev.scrollLeft:0;   // preserve horizontal scroll on re-sort
+  let h=`<div class="board-wrap statwrap"><table class="board stattbl"><tr>`+
+    `<th class="stname ${S.statSort==='name'?'sorton':''}" onclick="setStatSort('name')">PLAYER${S.statSort==='name'?arrow:''}</th>`+
+    cols.map(c=>`<th class="stnum ${S.statSort===c.key?'sorton':''}" onclick="setStatSort('${c.key}')">${c.lbl}${S.statSort===c.key?arrow:''}</th>`).join("")+`</tr>`;
+  list.forEach((p,i)=>{
+    const gp=isGP(p.id),dnd=isDND(p.id);
+    h+=`<tr onclick="openPlayer(${p.id})"><td class="stname ${S.statSort==='name'?'sorton':''}"><span class="strk">${i+1}</span>`+
+       `<span class="stpn ${gp?'gp-name':dnd?'dnd-name':''}">${escapeHtml(p.name)}</span>`+
+       `${p.drafted?`<span class="stdot" style="background:${teamById(p.teamId).color}" title="Drafted · ${teamById(p.teamId).name}"></span>`:''}`+
+       `${p.flag?`<span class="stwarn" title="${escapeHtml(p.flag)}">${I.warn}</span>`:''}</td>`+
+       cols.map(c=>`<td class="stnum ${S.statSort===c.key?'sorton':''}">${statCell(p,c)}</td>`).join("")+`</tr>`;
+  });
+  h+=`</table></div><div class="hint">All ${list.length} campers · ${divName()} · tap a column to sort, tap a player for the full profile.</div>`;
+  el.innerHTML=h;
+  const nw=el.querySelector('.board-wrap'); if(nw) nw.scrollLeft=sl;
+}
 /* ---- PLAYER DETAIL ---- */
 function openPlayer(pid){
   const p=PLAYERS.find(x=>x.id===pid);
@@ -776,13 +946,11 @@ function openPlayer(pid){
   }
   // actions
   let actions="";
-  if(S.role==="moderator"){
-    if(!drafted&&!draftDone()&&!S.locked) actions=`<div class="dactions"><button class="dbtn" onclick="assign(${p.id});closeSheet()">Draft to ${teamById(onClockTeamId()).name}</button></div>`;
-    else if(drafted) actions=`<div class="posrow"><label>Reassign to team — fix a wrong pick</label><select class="possel" onchange="reassignTeam(${p.id},this.value)">${TEAMS.map(t=>`<option value="${t.id}" ${t.id===p.teamId?'selected':''}>${t.name}</option>`).join("")}</select></div><div class="dactions"><button class="dbtn danger" onclick="undoPick(${p.id});closeSheet()">Return ${p.first} to Pool</button></div>`;
-  } else if(canQueue()&&!drafted){
-    const on=inTeamQueue(p.id);
-    actions=`<div class="dactions"><button class="dbtn ${on?'ghost':''}" onclick="toggleQueue(${p.id});closeSheet()">${on?'Remove from Queue':'Add to Queue'}</button></div>`;
-  }
+  const canDraft=!drafted&&onClockDrafter();
+  if(canDraft) actions+=`<div class="dactions"><button class="dbtn" onclick="confirmDraft(${p.id})">Draft to ${escapeHtml(teamById(onClockTeamId()).name)}</button></div>`;
+  if(canQueue()&&!drafted){ const on=inTeamQueue(p.id);
+    actions+=`<div class="dactions" style="margin-top:${canDraft?'10px':'6px'}"><button class="dbtn ${on||canDraft?'ghost':''}" onclick="toggleQueue(${p.id});closeSheet()">${on?'Remove from Queue':'Add to Queue'}</button></div>`; }
+  if(S.role==="moderator"&&drafted){ actions+=`<div class="posrow"><label>Reassign to team — fix a wrong pick</label><select class="possel" onchange="reassignTeam(${p.id},this.value)">${TEAMS.map(t=>`<option value="${t.id}" ${t.id===p.teamId?'selected':''}>${t.name}</option>`).join("")}</select></div><div class="dactions"><button class="dbtn danger" onclick="confirmReturnPool(${p.id})">Return ${p.first} to Pool</button></div>`; }
   $("sheet").innerHTML=`
     <div class="sh-top"><button class="ic" onclick="closeSheet()">${I.back}</button></div>
     <div class="sh-body">
@@ -920,7 +1088,9 @@ function settingsMain(){
       ${setRow(I.person,"Account","","setPage('account')")}
       ${setRow(I.question,"About","","setPage('help')")}`;
   }
-  return `<div class="set-sec">Camp Info</div>
+  const teamSec = S.role==="head" ? `<div class="set-sec">My Team · ${escapeHtml(teamById(S.coachTeam).name)}</div>
+    <div class="set-row" onclick="toggleDelegate()"><span class="si">${I.person}</span><span class="sl">Let my assistant draft<div class="ssub">Allow your assistant coach to make this team's picks when you're on the clock</div></span><span class="sv"><span class="toggle ${S.draftDelegate[S.coachTeam]?'on':''}"><span class="knob"></span></span></span></div>` : "";
+  return `${teamSec}<div class="set-sec">Camp Info</div>
     ${setRow(I.nQueue,"Draft rules","","setPage('rules')")}
     ${setRow(I.doc,"Camp policies","","setPage('policies')")}
     ${setRow(I.shield,"Code of conduct","","setPage('conduct')")}
@@ -930,6 +1100,8 @@ function settingsMain(){
     ${setRow(I.person,"Account","","setPage('account')")}
     ${setRow(I.question,"About","","setPage('help')")}`;
 }
+function toggleDelegate(){ if(S.role!=="head")return; S.draftDelegate[S.coachTeam]=!S.draftDelegate[S.coachTeam];
+  toast(S.draftDelegate[S.coachTeam]?"Assistant can now draft for "+teamById(S.coachTeam).name:"Assistant draft access turned off"); renderSettings(); }
 function pageDivision(){
   return `<div class="hint" style="margin:0 2px 12px">Switch which camp division you're drafting. Each has its own campers, teams, and board. PeeWee holds your real roster; the others are sample data for now.</div>`+
     DIVISIONS.map(d=>`<div class="set-row" onclick="loadDivision('${d.key}')"><span class="si">${I.nRosters}</span><span class="sl">${d.name}<div class="ssub">${d.band}</div></span><span class="sv">${S.divKey===d.key?`<span style="color:var(--gold)">${I.check}</span>`:''} ${I.chevR}</span></div>`).join("");
