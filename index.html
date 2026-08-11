@@ -153,9 +153,12 @@
   /* ---------- Do Not Draft ---------- */
   .pcard.dnd{border-color:#7a2b26;background:linear-gradient(180deg,rgba(224,90,78,.09),rgba(224,90,78,.02))}
   .pcard.dnd .pname{color:#ef6a5e;text-decoration:line-through;text-decoration-color:rgba(239,106,94,.55);text-decoration-thickness:2px}
+  .pcard.gp{border-color:#2a6b47;background:linear-gradient(180deg,rgba(63,191,127,.11),rgba(63,191,127,.02))}
+  .pcard.gp .pname{color:#5fd39b}
   .badge-dnd{display:inline-flex;align-items:center;gap:4px;font-family:'Oswald',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.6px;color:#fff;background:var(--red);border-radius:5px;padding:3px 7px;text-transform:uppercase}
   .badge-dnd svg{width:11px;height:11px}
   .dnd-name{color:#ef6a5e !important;text-decoration:line-through;text-decoration-color:rgba(239,106,94,.55);text-decoration-thickness:2px}
+  .gp-name{color:#5fd39b !important}
   .prospectrow{display:flex;gap:9px;margin:2px 0 20px}
   .gpbtn,.dndbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;border-radius:11px;padding:13px 10px;font-family:'Oswald',sans-serif;font-weight:600;font-size:13px;letter-spacing:.6px;text-transform:uppercase;cursor:pointer}
   .gpbtn{border:1.5px solid var(--green);color:var(--green)}
@@ -169,6 +172,7 @@
   .dbadge.gpb{color:#06231a;background:var(--green);border:1px solid var(--green);margin-left:6px;display:inline-flex;align-items:center;gap:5px}
   .dbadge.gpb svg{width:12px;height:12px}
   .dhead.dnd .dname{color:#ef6a5e;text-decoration:line-through;text-decoration-color:rgba(239,106,94,.5);text-decoration-thickness:2px}
+  .dhead.gp .dname{color:#5fd39b}
   .dbadge.dndb{color:#fff;background:var(--red);border:1px solid var(--red);margin-left:6px;display:inline-flex;align-items:center;gap:5px}
   .dbadge.dndb svg{width:12px;height:12px}
 
@@ -687,7 +691,7 @@ function playerCard(p){
   if(S.role==="moderator"&&!draftDone()&&!S.locked) action=`<button class="qbtn draft" onclick="event.stopPropagation();assign(${p.id})">Draft</button>`;
   else if(canQueue()){ action=inTeamQueue(p.id)?`<span class="qtag">${I.checkC} Queued</span>`:`<button class="qbtn" onclick="event.stopPropagation();toggleQueue(${p.id})">${I.plus} Queue</button>`; }
   else if(S.role==="assistant"&&inTeamQueue(p.id)) action=`<span class="qtag">${I.checkC} Queued</span>`;
-  return `<div class="pcard ${dnd?'dnd':''}" onclick="openPlayer(${p.id})">
+  return `<div class="pcard ${dnd?'dnd':''}${gp?' gp':''}" onclick="openPlayer(${p.id})">
     <div class="pbody">
       <div class="prow1"><span class="pname">${p.name}</span>${gp?`<span class="pdot gp" title="Great prospect"></span>`:''}${dnd?`<span class="pdot dnd" title="Do not draft"></span>`:''}${p.flag?`<span class="warn" title="${p.flag}">${I.warn}</span>`:''}</div>
       <div class="pmeta">${metaLine(p)}</div>
@@ -707,7 +711,7 @@ function renderQueue(){
   else{
     q.forEach((p,i)=>{
       const gone=p.drafted;
-      h+=`<div class="qrow ${gone?'gone':''}"><span class="q-idx">${i+1}</span>${crest(p.teamId||S.coachTeam)}<div class="q-body" onclick="openPlayer(${p.id})"><div class="q-name ${isDND(p.id)?'dnd-name':''}">${p.name}</div><div class="q-meta">${fmtHt(p.height)} • ${p.weight??'—'} lb • ${p.age??'—'} yrs${gone?` · drafted by ${teamById(p.teamId).name}`:''}</div></div>`;
+      h+=`<div class="qrow ${gone?'gone':''}"><span class="q-idx">${i+1}</span>${crest(p.teamId||S.coachTeam)}<div class="q-body" onclick="openPlayer(${p.id})"><div class="q-name ${isGP(p.id)?"gp-name":isDND(p.id)?"dnd-name":""}">${p.name}</div><div class="q-meta">${fmtHt(p.height)} • ${p.weight??'—'} lb • ${p.age??'—'} yrs${gone?` · drafted by ${teamById(p.teamId).name}`:''}</div></div>`;
       if(editable&&S.queueEdit&&!gone) h+=`<div class="q-handle"><button onclick="moveQueue(${p.id},-1)">▲</button><button onclick="moveQueue(${p.id},1)">▼</button></div><button class="q-x" onclick="toggleQueue(${p.id})">${I.x}</button>`;
       else if(editable&&gone) h+=`<button class="q-x" onclick="toggleQueue(${p.id})">${I.x}</button>`;
       else if(editable) h+=`<button class="q-dots" onclick="openPlayer(${p.id})">${I.dots}</button>`;
@@ -735,7 +739,7 @@ function renderRosters(){
     if(!roster.length) h+=`<div class="empty">No players drafted to this team yet.</div>`;
     else{
       h+=`<div class="rtable"><div class="rt-h"><span class="rt-pickh">Pick</span><span class="rt-name">Player</span><span class="rt-ht">HT</span><span class="rt-wt">WT</span><span class="rt-age">AGE</span><span class="rt-chev"></span></div>`;
-      roster.forEach((p,i)=>{ h+=`<div class="rt-r" onclick="openPlayer(${p.id})"><span class="rt-pick"><span class="rt-ord">${i+1}</span>${p.pickNo?`<span class="rt-ovr">#${p.pickNo} overall</span>`:''}</span><span class="rt-name ${isDND(p.id)?'dnd-name':''}">${p.name}</span><span class="rt-ht">${fmtHt(p.height)}</span><span class="rt-wt">${p.weight??'—'}</span><span class="rt-age">${p.age??'—'}</span><span class="rt-chev">${I.chevR}</span></div>`; });
+      roster.forEach((p,i)=>{ h+=`<div class="rt-r" onclick="openPlayer(${p.id})"><span class="rt-pick"><span class="rt-ord">#${p.pickNo??(i+1)}</span><span class="rt-ovr">Round ${i+1}</span></span><span class="rt-name ${isGP(p.id)?"gp-name":isDND(p.id)?"dnd-name":""}">${p.name}</span><span class="rt-ht">${fmtHt(p.height)}</span><span class="rt-wt">${p.weight??'—'}</span><span class="rt-age">${p.age??'—'}</span><span class="rt-chev">${I.chevR}</span></div>`; });
       h+=`</div>`;
     }
   }
@@ -782,7 +786,7 @@ function openPlayer(pid){
   $("sheet").innerHTML=`
     <div class="sh-top"><button class="ic" onclick="closeSheet()">${I.back}</button></div>
     <div class="sh-body">
-      <div class="dhead ${dnd?'dnd':''}"><div><div class="dname">${p.name}</div>${badge}${gp?`<span class="dbadge gpb">${I.check} Great Prospect</span>`:''}${dnd?`<span class="dbadge dndb">${I.ban} Do Not Draft</span>`:''}<div class="dsub">${p.campExp} yr${p.campExp!==1?'s':''} camp · ${p.level==='PW'?'PeeWee':p.level} · ${p.age??'—'} yrs old</div></div>${crest(drafted?p.teamId:S.coachTeam)}</div>
+      <div class="dhead ${dnd?'dnd':''}${gp?' gp':''}"><div><div class="dname">${p.name}</div>${badge}${gp?`<span class="dbadge gpb">${I.check} Great Prospect</span>`:''}${dnd?`<span class="dbadge dndb">${I.ban} Do Not Draft</span>`:''}<div class="dsub">${p.campExp} yr${p.campExp!==1?'s':''} camp · ${p.level==='PW'?'PeeWee':p.level} · ${p.age??'—'} yrs old</div></div>${crest(drafted?p.teamId:S.coachTeam)}</div>
       ${p.flag?`<div class="warnrow">${I.warn}<span>${p.flag} — worth confirming in the source sheet.</span></div>`:''}
       <div class="statgrid">${gridHtml}</div>
       ${statsBlock(p)}
