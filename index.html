@@ -57,8 +57,12 @@
   .viewas.locked{cursor:default}
   .viewas .vchev{margin-left:auto;color:var(--mute)}
   .viewas .vchev svg{width:16px;height:16px}
-  .viewmenu{display:none;position:absolute;left:0;right:0;top:100%;z-index:60;background:#141417;border-bottom:1px solid var(--line);box-shadow:0 18px 40px rgba(0,0,0,.6)}
+  .viewmenu{display:none;position:absolute;left:0;right:0;top:100%;z-index:60;background:#141417;border-bottom:1px solid var(--line);box-shadow:0 18px 40px rgba(0,0,0,.6);max-height:74vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .viewmenu.open{display:block}
+  .vm-sublbl{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);padding:9px 16px 3px}
+  .vm-sublbl .sw{width:11px;height:11px;border-radius:3px;border:1px solid rgba(255,255,255,.25)}
+  .vm-item.vm-sub{padding-left:34px;font-size:13.5px;color:var(--mute)}
+  .vm-item.vm-sub.sel{color:var(--gold)}
   .vm-group{padding:6px 0}
   .vm-lbl{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);padding:8px 16px 3px}
   .vm-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;font-size:14px;color:var(--ink)}
@@ -483,7 +487,8 @@ function buildOrder(seed){const o=[];for(let r=0;r<ROUNDS;r++){(r%2===0?seed:[..
 let ORDER=buildOrder(TEAMS.map(t=>t.id));
 
 /* ================= STATE ================= */
-const S={ role:"moderator", coachTeam:1, view:"board", seed:TEAMS.map(t=>t.id), seq:0,
+const ASST_COUNT=4;   // assistant coaches per team (each has private notes/tags; head coach picks which may draft)
+const S={ role:"moderator", coachTeam:1, coachAsst:1, view:"board", seed:TEAMS.map(t=>t.id), seq:0,
   queues:{}, notes:{}, tags:{}, tagVocab:["Fast","Strong","Heart","Tackle","Football IQ","Hands","Motor","Coachable","Leader"],
   search:"", sort:"name", sortDir:"asc", rosterTeam:null, queueEdit:false, viewMenu:false,
   statCat:"measure", statSort:"weight", statDir:"desc", statSearch:"", draftDelegate:{},
@@ -536,7 +541,7 @@ const headerLogo=`<svg viewBox="0 0 24 26"><path d="M12 1.4 21.4 4.5 V12 C21.4 1
 /* ================= HELPERS ================= */
 const isCoach=()=>S.role==="head"||S.role==="assistant";
 const canQueue=()=>S.role==="head";
-const coachKey=()=>(S.role==="head"?"H":"A")+S.coachTeam;
+const coachKey=()=>S.role==="head"?"H"+S.coachTeam:"A"+S.coachTeam+"."+S.coachAsst;   // each assistant slot is its own private identity
 const noteBag=()=>S.notes[coachKey()]||(S.notes[coachKey()]={});
 const tagBag=()=>S.tags[coachKey()]||(S.tags[coachKey()]={});
 const noteOf=id=>isCoach()?((S.notes[coachKey()]||{})[id]||""):"";
@@ -558,7 +563,7 @@ const draftDone=()=>picksMade()>=ORDER.length||PLAYERS.every(p=>p.drafted);
 function onClockDrafter(){ const tid=onClockTeamId(); if(tid==null||S.locked||draftDone()) return false;
   if(S.role==="moderator") return true;                                    // moderator can draft for whichever team is on the clock
   if(S.role==="head"&&S.coachTeam===tid) return true;
-  if(S.role==="assistant"&&S.coachTeam===tid&&S.draftDelegate[tid]) return true;
+  if(S.role==="assistant"&&S.coachTeam===tid&&(S.draftDelegate[tid]||[]).includes(S.coachAsst)) return true;
   return false; }
 function roundInfo(i){i=(i==null?picksMade():i);return{rd:Math.floor(i/TEAMS.length)+1,pir:i%TEAMS.length+1};}
 function fmtHt(h){return h?h.replace('-',"'")+'"':'—';}
@@ -599,16 +604,19 @@ function confirmDraft(pid){ const p=PLAYERS.find(x=>x.id===pid); if(!p||p.drafte
     </div>`;
   showSheet(); }
 function doDraft(pid){ assign(pid); closeSheet(); }
-// Generic "are you sure?" modal, reused for undo / return-to-pool so nothing reverses by accident.
-let _pendingConfirm=null;
-function askConfirm(o){ _pendingConfirm=o.run||null; $("sheet").classList.remove("settings");
-  $("sheet").innerHTML=`<div class="sh-top"><button class="ic" onclick="closeSheet()">${I.x}</button></div>
+// Generic "are you sure?" modal, reused for undo / return-to-pool / reassign so nothing changes by accident.
+let _pendingConfirm=null,_pendingCancel=null;
+function askConfirm(o){ _pendingConfirm=o.run||null; _pendingCancel=o.cancel||null; $("sheet").classList.remove("settings");
+  $("sheet").innerHTML=`<div class="sh-top"><button class="ic" onclick="runCancel()">${I.x}</button></div>
     <div class="sh-body confirm">${o.crest?`<div class="cf-crest">${o.crest}</div>`:''}
       <div class="cf-q">${o.title}</div>${o.sub?`<div class="cf-sub">${o.sub}</div>`:''}
-      <div class="dactions"><button class="dbtn ghost" onclick="closeSheet()">Cancel</button>
+      <div class="dactions"><button class="dbtn ghost" onclick="runCancel()">Cancel</button>
         <button class="dbtn"${o.danger?' style="background:var(--red);border-color:var(--red);color:#fff"':''} onclick="runConfirm()">${o.confirmLabel||'Confirm'}</button></div>
     </div>`; showSheet(); }
-function runConfirm(){ const fn=_pendingConfirm; _pendingConfirm=null; closeSheet(); if(fn)fn(); }
+function runConfirm(){ const fn=_pendingConfirm; _pendingConfirm=null; _pendingCancel=null; closeSheet(); if(fn)fn(); }
+function runCancel(){ const fn=_pendingCancel; _pendingConfirm=null; _pendingCancel=null; if(fn){ fn(); } else { closeSheet(); } }
+function confirmReassign(pid,newTid){ newTid=+newTid; const p=PLAYERS.find(x=>x.id===pid); if(!p||!p.drafted||newTid===p.teamId){ openPlayer(pid); return; }
+  askConfirm({crest:crest(newTid),title:`Move ${escapeHtml(p.first)} to ${escapeHtml(teamById(newTid).name)}?`,sub:`${escapeHtml(p.name)} — pick #${p.pickNo} — moves from ${escapeHtml(teamById(p.teamId).name)} to ${escapeHtml(teamById(newTid).name)}.`,confirmLabel:"Move Player",run:()=>{ reassignTeam(pid,newTid); openPlayer(pid); },cancel:()=>openPlayer(pid)}); }
 function confirmUndoLast(){ const d=PLAYERS.filter(p=>p.drafted); if(!d.length)return toast("No picks to undo");
   const p=d.sort((a,b)=>b.pickNo-a.pickNo)[0];
   askConfirm({crest:crest(p.teamId),title:"Undo the last pick?",sub:`${escapeHtml(p.name)} — pick #${p.pickNo}, ${escapeHtml(teamById(p.teamId).name)} — goes back to the pool.`,confirmLabel:"Undo Pick",danger:true,run:()=>undoLast()}); }
@@ -654,15 +662,21 @@ function setSort(k){ if(S.sort===k){S.sortDir=S.sortDir==="asc"?"desc":"asc";} e
 
 /* ================= VIEW-AS ================= */
 function viewLabel(){ if(S.role==="moderator")return "View as Moderator";
-  return "View as "+(S.role==="head"?"Head Coach":"Assistant Coach")+" — "+teamById(S.coachTeam).name; }
+  if(S.role==="head")return "View as Head Coach — "+teamById(S.coachTeam).name;
+  return "View as Assistant "+S.coachAsst+" — "+teamById(S.coachTeam).name; }
 function viewColor(){ return S.role==="moderator"?"var(--gold)":teamById(S.coachTeam).color; }
 function toggleViewMenu(e){ if(LOCK_ROLE) return; if(e)e.stopPropagation(); S.viewMenu=!S.viewMenu; $("viewmenu").classList.toggle("open",S.viewMenu); }
-function setRoleTeam(role,team){ S.role=role; if(team)S.coachTeam=team; S.viewMenu=false;
+function setRoleTeam(role,team,asst){ S.role=role; if(team)S.coachTeam=team; if(role==="assistant")S.coachAsst=asst||1; S.viewMenu=false;
   if(!isCoach()&&S.view==="queue")S.view="board"; if(S.view==="rosters")S.rosterTeam=null; render(); }
 function renderViewMenu(){
   let h=`<div class="vm-group"><div class="vm-item ${S.role==='moderator'?'sel':''}" onclick="setRoleTeam('moderator')"><span class="vicon" style="color:var(--gold)">${I.person}</span>Moderator ${S.role==='moderator'?`<span class="chk">${I.check}</span>`:''}</div></div>`;
   h+=`<div class="vm-group"><div class="vm-lbl">Head Coach</div>`+TEAMS.map(t=>`<div class="vm-item ${S.role==='head'&&S.coachTeam===t.id?'sel':''}" onclick="setRoleTeam('head',${t.id})"><span class="sw" style="background:${t.color}"></span>${t.name} ${S.role==='head'&&S.coachTeam===t.id?`<span class="chk">${I.check}</span>`:''}</div>`).join("")+`</div>`;
-  h+=`<div class="vm-group"><div class="vm-lbl">Assistant Coach</div>`+TEAMS.map(t=>`<div class="vm-item ${S.role==='assistant'&&S.coachTeam===t.id?'sel':''}" onclick="setRoleTeam('assistant',${t.id})"><span class="sw" style="background:${t.color}"></span>${t.name} ${S.role==='assistant'&&S.coachTeam===t.id?`<span class="chk">${I.check}</span>`:''}</div>`).join("")+`</div>`;
+  h+=`<div class="vm-group"><div class="vm-lbl">Assistant Coach</div>`+TEAMS.map(t=>{
+    let sub=`<div class="vm-sublbl"><span class="sw" style="background:${t.color}"></span>${t.name}</div>`;
+    for(let n=1;n<=ASST_COUNT;n++){ const sel=S.role==='assistant'&&S.coachTeam===t.id&&S.coachAsst===n;
+      sub+=`<div class="vm-item vm-sub ${sel?'sel':''}" onclick="setRoleTeam('assistant',${t.id},${n})">Assistant ${n} ${sel?`<span class="chk">${I.check}</span>`:''}</div>`; }
+    return sub;
+  }).join("")+`</div>`;
   $("viewmenu").innerHTML=h;
 }
 
@@ -950,7 +964,7 @@ function openPlayer(pid){
   if(canDraft) actions+=`<div class="dactions"><button class="dbtn" onclick="confirmDraft(${p.id})">Draft to ${escapeHtml(teamById(onClockTeamId()).name)}</button></div>`;
   if(canQueue()&&!drafted){ const on=inTeamQueue(p.id);
     actions+=`<div class="dactions" style="margin-top:${canDraft?'10px':'6px'}"><button class="dbtn ${on||canDraft?'ghost':''}" onclick="toggleQueue(${p.id});closeSheet()">${on?'Remove from Queue':'Add to Queue'}</button></div>`; }
-  if(S.role==="moderator"&&drafted){ actions+=`<div class="posrow"><label>Reassign to team — fix a wrong pick</label><select class="possel" onchange="reassignTeam(${p.id},this.value)">${TEAMS.map(t=>`<option value="${t.id}" ${t.id===p.teamId?'selected':''}>${t.name}</option>`).join("")}</select></div><div class="dactions"><button class="dbtn danger" onclick="confirmReturnPool(${p.id})">Return ${p.first} to Pool</button></div>`; }
+  if(S.role==="moderator"&&drafted){ actions+=`<div class="posrow"><label>Reassign to team — fix a wrong pick</label><select class="possel" onchange="confirmReassign(${p.id},this.value)">${TEAMS.map(t=>`<option value="${t.id}" ${t.id===p.teamId?'selected':''}>${t.name}</option>`).join("")}</select></div><div class="dactions"><button class="dbtn danger" onclick="confirmReturnPool(${p.id})">Return ${p.first} to Pool</button></div>`; }
   $("sheet").innerHTML=`
     <div class="sh-top"><button class="ic" onclick="closeSheet()">${I.back}</button></div>
     <div class="sh-body">
@@ -1089,7 +1103,9 @@ function settingsMain(){
       ${setRow(I.question,"About","","setPage('help')")}`;
   }
   const teamSec = S.role==="head" ? `<div class="set-sec">My Team · ${escapeHtml(teamById(S.coachTeam).name)}</div>
-    <div class="set-row" onclick="toggleDelegate()"><span class="si">${I.person}</span><span class="sl">Let my assistant draft<div class="ssub">Allow your assistant coach to make this team's picks when you're on the clock</div></span><span class="sv"><span class="toggle ${S.draftDelegate[S.coachTeam]?'on':''}"><span class="knob"></span></span></span></div>` : "";
+    <div class="hint" style="margin:0 2px 10px">Choose which assistant coaches may make this team's picks when you're on the clock. You can pick more than one.</div>`+
+    Array.from({length:ASST_COUNT},(_,i)=>i+1).map(n=>{ const on=(S.draftDelegate[S.coachTeam]||[]).includes(n);
+      return `<div class="set-row" onclick="toggleDelegate(${n})"><span class="si">${I.person}</span><span class="sl">Assistant ${n} can draft</span><span class="sv"><span class="toggle ${on?'on':''}"><span class="knob"></span></span></span></div>`; }).join("") : "";
   return `${teamSec}<div class="set-sec">Camp Info</div>
     ${setRow(I.nQueue,"Draft rules","","setPage('rules')")}
     ${setRow(I.doc,"Camp policies","","setPage('policies')")}
@@ -1100,10 +1116,11 @@ function settingsMain(){
     ${setRow(I.person,"Account","","setPage('account')")}
     ${setRow(I.question,"About","","setPage('help')")}`;
 }
-function toggleDelegate(){ if(S.role!=="head")return; S.draftDelegate[S.coachTeam]=!S.draftDelegate[S.coachTeam];
-  toast(S.draftDelegate[S.coachTeam]?"Assistant can now draft for "+teamById(S.coachTeam).name:"Assistant draft access turned off"); renderSettings(); }
+function toggleDelegate(n){ if(S.role!=="head")return; const t=S.coachTeam; const arr=S.draftDelegate[t]||(S.draftDelegate[t]=[]);
+  const i=arr.indexOf(n); if(i>=0)arr.splice(i,1); else arr.push(n);
+  toast("Assistant "+n+(i>=0?" can no longer draft":" can now draft")); renderSettings(); }
 function pageDivision(){
-  return `<div class="hint" style="margin:0 2px 12px">Switch which camp division you're drafting. Each has its own campers, teams, and board. PeeWee holds your real roster; the others are sample data for now.</div>`+
+  return `<div class="hint" style="margin:0 2px 12px">Switch which camp division you're drafting. Each has its own campers, teams, and board, loaded from the camp's real rosters — with 40 times and season stats for Know Fear, JV, and Varsity.</div>`+
     DIVISIONS.map(d=>`<div class="set-row" onclick="loadDivision('${d.key}')"><span class="si">${I.nRosters}</span><span class="sl">${d.name}<div class="ssub">${d.band}</div></span><span class="sv">${S.divKey===d.key?`<span style="color:var(--gold)">${I.check}</span>`:''} ${I.chevR}</span></div>`).join("");
 }
 function pageTeams(){
@@ -1136,7 +1153,7 @@ function pageNotif(){
     items.map(([k,l])=>`<div class="set-row" onclick="toggleNotif('${k}')"><span class="sl">${l}</span><span class="sv"><span class="toggle ${S.notif[k]?'on':''}"><span class="knob"></span></span></span></div>`).join("");
 }
 function pageAccount(){
-  const who=S.role==="moderator"?"Moderator":(S.role==="head"?"Head Coach — "+teamById(S.coachTeam).name:"Assistant Coach — "+teamById(S.coachTeam).name);
+  const who=S.role==="moderator"?"Moderator":(S.role==="head"?"Head Coach — "+teamById(S.coachTeam).name:"Assistant "+S.coachAsst+" — "+teamById(S.coachTeam).name);
   return `<div class="teamedit"><div class="lbl">Signed in as</div><div style="font-family:'Oswald';font-weight:600;font-size:18px;margin-top:4px">${who}</div>
     <div class="lbl" style="margin-top:12px">Division</div><div style="margin-top:4px">${divName()}</div></div>
     <button class="dbtn danger" style="width:100%" onclick="toast('Sign-out is wired in the full app')">Sign out</button>
